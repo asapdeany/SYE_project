@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/fragment_menu">
+
+    <Button
+        android:id="@+id/button_play"
+
+        android:text="@string/string_play"
+        android:textColor="#FFFFFF"
+        android:textSize="30sp"
+
+        android:layout_width="@dimen/menu_button_size"
+        android:layout_height="@dimen/menu_button_size"
+        android:background="@drawable/button_menu"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

@@ -2,6 +2,8 @@ package com.example.deansponholz.sye_project;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +18,7 @@ import android.widget.LinearLayout;
 public class Fragment_Menu extends Fragment {
 
     Button button_play;
+    Bitmap bitmapTrademark;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_menu, container, false);
@@ -32,5 +35,10 @@ public class Fragment_Menu extends Fragment {
         });
 
         return root;
+    }
+
+    private void loadBitmaps(){
+        bitmapTrademark = BitmapFactory.decodeResource(getResources(), R.drawable.trademark);
+        //bitmapTrademark.setWidth();
     }
 }

@@ -95,7 +95,7 @@ public class Fragment_Play extends Fragment {
         fragment_practice.addView(practiceDrawView);
 
 
-        loadImages();
+        loadBitmaps();
         testGun0 = (ImageView) root.findViewById(R.id.iv_gun);
         testGun0.setImageBitmap(bitmap0);
         testgun1 = (ImageView) root.findViewById(R.id.iv_url);
@@ -114,7 +114,7 @@ public class Fragment_Play extends Fragment {
         return root;
     }
 
-    private void loadImages(){
+    private void loadBitmaps(){
 
         //load ImageViews from Drawables
         bitmap0 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_0);
@@ -122,6 +122,8 @@ public class Fragment_Play extends Fragment {
         bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_2);
         bitmap3 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_3);
         bitmap4 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_4);
+
+
 
         imgList.add(bitmap0);
         imgList.add(bitmap1);

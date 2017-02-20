@@ -80,7 +80,7 @@ public class Fragment_Calibrate extends Fragment {
         public void onDraw(Canvas canvas) {
             canvas.drawCircle(width / 2, height / 2, 100, paint);
 
-            canvas.drawCircle((float)(-sensorHandler.xPos*43 + 1280), (float) (sensorHandler.yPos*38 + 720), 800, paint);
+            canvas.drawCircle((float)(-sensorHandler.xPos*43 + 1280), (float) (sensorHandler.yPos*38 + 720), 80, paint);
             //canvas.drawLine((float) (-sensorHandler.xPos * 15), (float) (sensorHandler.yPos * 15), width / 2, height / 2, paint);
 
 

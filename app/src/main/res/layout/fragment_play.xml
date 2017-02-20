@@ -9,8 +9,16 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/iv_image_from_url"
+        android:id="@+id/iv_gun"
         android:layout_centerVertical="false"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/iv_url"
+        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true" />
 

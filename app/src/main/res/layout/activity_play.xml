@@ -7,8 +7,9 @@
     tools:context="com.example.deansponholz.sye_project.Activity_Play">
 
     <fragment
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:name="com.example.deansponholz.sye_project.Fragment_Play"
-        android:id="@+id/fragment_play" />
+        android:id="@+id/fragment_play"
+        tools:layout="@layout/fragment_play" />
 </LinearLayout>

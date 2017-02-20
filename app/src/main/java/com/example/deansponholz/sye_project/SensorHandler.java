@@ -3,7 +3,7 @@ package com.example.deansponholz.sye_project;
 import android.content.Context;
 import android.hardware.SensorManager;
 
-import com.squareup.picasso.Picasso;
+
 
 /**
  * Created by deansponholz on 1/19/17.

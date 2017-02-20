@@ -23,8 +23,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
+import com.bumptech.glide.Glide;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,13 +36,14 @@ import static android.R.attr.bitmap;
  * Created by deansponholz on 1/19/17.
  */
 
+//test bitmap animation
+
 public class Fragment_Play extends Fragment {
 
+    //Instance Data
     public SensorHandler sensorHandler = null;
     ImageView testGun0;
     ImageView testgun1;
-    int i =0;
-    Handler h = new Handler();
 
     View decorView;
     Integer uiOptions;
@@ -94,28 +95,11 @@ public class Fragment_Play extends Fragment {
         fragment_practice.addView(practiceDrawView);
 
 
-        bitmap0 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_0);
-        bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_1);
-        bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_2);
-        bitmap3 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_3);
-        bitmap4 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_4);
-
-
-        imgList.add(bitmap0);
-        imgList.add(bitmap1);
-        imgList.add(bitmap2);
-        imgList.add(bitmap3);
-        imgList.add(bitmap4);
-        imgList.add(bitmap3);
-        imgList.add(bitmap2);
-        imgList.add(bitmap1);
-        imgList.add(bitmap0);
-
-
-        testGun0 = (ImageView) root.findViewById(R.id.iv_image_from_url);
+        loadImages();
+        testGun0 = (ImageView) root.findViewById(R.id.iv_gun);
         testGun0.setImageBitmap(bitmap0);
-
-
+        testgun1 = (ImageView) root.findViewById(R.id.iv_url);
+        Glide.with(this).load("http://goo.gl/gEgYUd").into(testgun1);
 
         button_shoot = (Button) root.findViewById(R.id.button_shoot);
         button_shoot.setOnTouchListener(new RepeatListener(0, 20, new View.OnClickListener() {
@@ -129,6 +113,29 @@ public class Fragment_Play extends Fragment {
         }));
         return root;
     }
+
+    private void loadImages(){
+
+        //load ImageViews from Drawables
+        bitmap0 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_0);
+        bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_1);
+        bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_2);
+        bitmap3 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_3);
+        bitmap4 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_4);
+
+        imgList.add(bitmap0);
+        imgList.add(bitmap1);
+        imgList.add(bitmap2);
+        imgList.add(bitmap3);
+        imgList.add(bitmap4);
+        imgList.add(bitmap3);
+        imgList.add(bitmap2);
+        imgList.add(bitmap1);
+        imgList.add(bitmap0);
+
+    }
+
+ 
 
     public void reload(){
         final Handler handler = new Handler();
@@ -146,26 +153,6 @@ public class Fragment_Play extends Fragment {
         };
     }
 
-/*
-    public void retrieveBitmap(){
-        Picasso.with(getActivity()).load("http://deansponholz.com/images/image_gun_0.png").into(new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-
-            }
-
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-            }
-        });
-    }
-    */
     public class PracticeDrawView extends View {
 
         Canvas canvas;
@@ -203,6 +190,7 @@ public class Fragment_Play extends Fragment {
 
         private Runnable updateImageView = new Runnable() {
 
+            int i = 0;
             public void run() {
                 if (i <= imgList.size()-1){
                     testGun0.setImageBitmap(imgList.get(i));

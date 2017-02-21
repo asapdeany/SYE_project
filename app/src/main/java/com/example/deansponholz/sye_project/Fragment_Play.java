@@ -50,6 +50,8 @@ public class Fragment_Play extends Fragment {
     Bitmap bitmap0, bitmap1, bitmap2, bitmap3, bitmap4;
 
 
+
+
     RelativeLayout fragment_practice;
     Integer radiusValue;
     Button button_shoot;
@@ -98,8 +100,8 @@ public class Fragment_Play extends Fragment {
         loadBitmaps();
         testGun0 = (ImageView) root.findViewById(R.id.iv_gun);
         testGun0.setImageBitmap(bitmap0);
-        testgun1 = (ImageView) root.findViewById(R.id.iv_url);
-        Glide.with(this).load("http://goo.gl/gEgYUd").into(testgun1);
+        //testgun1 = (ImageView) root.findViewById(R.id.iv_url);
+        //Glide.with(this).load("http://goo.gl/gEgYUd").into(testgun1);
 
         button_shoot = (Button) root.findViewById(R.id.button_shoot);
         button_shoot.setOnTouchListener(new RepeatListener(0, 20, new View.OnClickListener() {
@@ -122,6 +124,8 @@ public class Fragment_Play extends Fragment {
         bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_2);
         bitmap3 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_3);
         bitmap4 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_4);
+
+
 
 
 

@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/fragment_menu"
-    android:background="@android:color/white">
+    android:id="@+id/fragment_menu">
 
     <Button
         android:id="@+id/button_play"
@@ -18,11 +17,5 @@
         android:background="@drawable/button_menu"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/trademark"
-        android:id="@+id/imageView" />
 
 </RelativeLayout>

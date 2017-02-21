@@ -18,7 +18,7 @@ import android.widget.LinearLayout;
 public class Fragment_Menu extends Fragment {
 
     Button button_play;
-    Bitmap bitmapTrademark;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_menu, container, false);
@@ -37,8 +37,4 @@ public class Fragment_Menu extends Fragment {
         return root;
     }
 
-    private void loadBitmaps(){
-        bitmapTrademark = BitmapFactory.decodeResource(getResources(), R.drawable.trademark);
-        //bitmapTrademark.setWidth();
-    }
 }

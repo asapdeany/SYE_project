@@ -3,18 +3,22 @@ package com.example.deansponholz.sye_project;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 /**
@@ -33,15 +37,27 @@ public class Fragment_Calibrate extends Fragment {
     int height;
     Button startButton;
 
+    Bitmap testBitmap;
+    ImageView testImageView;
+    Constants_Display constants_display;
+
+    RelativeLayout fragment_calibrate;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_calibrate, container, false);
         wm = (WindowManager) root.getContext().getSystemService(Context.WINDOW_SERVICE);
-        offSetCalculator();
+
+        constants_display = new Constants_Display(this.getContext());
         sensorHandler = new SensorHandler(root.getContext());
-        RelativeLayout fragment_calibrate = (RelativeLayout) root.findViewById(R.id.fragment_calibrate);
+        fragment_calibrate = (RelativeLayout) root.findViewById(R.id.fragment_calibrate);
         CalibrateDrawView calibrateDrawView = new CalibrateDrawView(this.getActivity());
         fragment_calibrate.addView(calibrateDrawView);
+        System.out.print("he4lo");
+        offSetCalculator();
+        displayImages();
+
+
 
         startButton = (Button) root.findViewById(R.id.button_start);
         startButton.setOnClickListener(new View.OnClickListener() {
@@ -89,6 +105,17 @@ public class Fragment_Calibrate extends Fragment {
 
     }
 
+    private void displayImages(){
+
+        testBitmap = constants_display.loadBitmapEfficiently(getContext(), getResources(), R.drawable.trademark, (int) (width * 0.05), (int) (height * 0.02));
+        testImageView = new ImageView(getContext());
+        testImageView.setImageBitmap(testBitmap);
+        testImageView.setX(width/2);
+        testImageView.setX(height/2);
+        fragment_calibrate.addView(testImageView);
+
+    }
+
     public void offSetCalculator() {
 
 
@@ -111,5 +138,11 @@ public class Fragment_Calibrate extends Fragment {
         display.getSize(size);
         width = size.x;
         height = size.y;
+
+
+
+
+
+
     }
 }

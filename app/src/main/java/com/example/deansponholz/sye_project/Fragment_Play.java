@@ -51,6 +51,7 @@ public class Fragment_Play extends Fragment {
 
 
 
+    Constants_Display constants_display;
 
     RelativeLayout fragment_practice;
     Integer radiusValue;
@@ -66,6 +67,7 @@ public class Fragment_Play extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_play, container, false);
 
+        constants_display = new Constants_Display(root.getContext());
         sensorHandler = new SensorHandler(root.getContext());
 
         decorView = getActivity().getWindow().getDecorView();
@@ -95,6 +97,7 @@ public class Fragment_Play extends Fragment {
         fragment_practice = (RelativeLayout) root.findViewById(R.id.fragment_practice);
         final PracticeDrawView practiceDrawView = new PracticeDrawView(this.getActivity());
         fragment_practice.addView(practiceDrawView);
+
 
 
         loadBitmaps();
@@ -174,14 +177,14 @@ public class Fragment_Play extends Fragment {
             paint.setColor(Color.BLACK);
             paint.setStrokeWidth(8.5f);
             paint.setStyle(Paint.Style.STROKE);
-            radiusValue = 80;
+            radiusValue = (int) (constants_display.height * 0.075);
         }
 
 
         @Override
         public void onDraw(Canvas canvas){
-            canvas.drawCircle((float)(-sensorHandler.xPos*43 + 1280), (float) (sensorHandler.yPos*38 + 720), radiusValue, paint);
-            testGun0.setX((float)(-sensorHandler.xPos*20 + (1280 - bitmap0.getWidth()/1.7)));
+            canvas.drawCircle((float)(-sensorHandler.xPos*43 + (constants_display.width)/2), (float) (sensorHandler.yPos*38 + ((constants_display.height)/2)), radiusValue, paint);
+            testGun0.setX((float)(-sensorHandler.xPos*20 + ((constants_display.width/2) - bitmap0.getWidth()/constants_display.hi)));
             invalidate();
         }
     }
@@ -253,7 +256,7 @@ public class Fragment_Play extends Fragment {
                 case MotionEvent.ACTION_UP:
 
 
-                    radiusValue = 80;
+                    radiusValue = (int) (constants_display.height * 0.075);
 
                     //handler.postDelayed(updateImageView, 0);
                     handler.post(updateImageView);

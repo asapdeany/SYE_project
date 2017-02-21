@@ -30,11 +30,9 @@ public class Fragment_Calibrate extends Fragment {
 
     public SensorHandler sensorHandler = null;
 
-    Display display;
+
     WindowManager wm;
-    Point size;
-    int width;
-    int height;
+
     Button startButton;
 
     Bitmap testBitmap;
@@ -48,14 +46,14 @@ public class Fragment_Calibrate extends Fragment {
         View root = inflater.inflate(R.layout.fragment_calibrate, container, false);
         wm = (WindowManager) root.getContext().getSystemService(Context.WINDOW_SERVICE);
 
-        constants_display = new Constants_Display(this.getContext());
+        constants_display = new Constants_Display(root.getContext());
         sensorHandler = new SensorHandler(root.getContext());
         fragment_calibrate = (RelativeLayout) root.findViewById(R.id.fragment_calibrate);
         CalibrateDrawView calibrateDrawView = new CalibrateDrawView(this.getActivity());
         fragment_calibrate.addView(calibrateDrawView);
         System.out.print("he4lo");
-        offSetCalculator();
-        displayImages();
+
+        //displayImages();
 
 
 
@@ -94,9 +92,9 @@ public class Fragment_Calibrate extends Fragment {
 
         @Override
         public void onDraw(Canvas canvas) {
-            canvas.drawCircle(width / 2, height / 2, 100, paint);
+            canvas.drawCircle(constants_display.width / 2, constants_display.height / 2, 100, paint);
 
-            canvas.drawCircle((float)(-sensorHandler.xPos*43 + 1280), (float) (sensorHandler.yPos*38 + 720), 80, paint);
+            canvas.drawCircle((float)(-sensorHandler.xPos*43 + (constants_display.width)/2), (float) (sensorHandler.yPos*38 + (constants_display.height)/2), 80, paint);
             //canvas.drawLine((float) (-sensorHandler.xPos * 15), (float) (sensorHandler.yPos * 15), width / 2, height / 2, paint);
 
 
@@ -107,42 +105,18 @@ public class Fragment_Calibrate extends Fragment {
 
     private void displayImages(){
 
-        testBitmap = constants_display.loadBitmapEfficiently(getContext(), getResources(), R.drawable.trademark, (int) (width * 0.05), (int) (height * 0.02));
+        testBitmap = constants_display.loadBitmapEfficiently(getContext(),
+                getResources(),
+                R.drawable.trademark,
+                (int) (constants_display.width * 0.05),
+                (int) (constants_display.height * 0.02));
+
         testImageView = new ImageView(getContext());
         testImageView.setImageBitmap(testBitmap);
-        testImageView.setX(width/2);
-        testImageView.setX(height/2);
+        testImageView.setX(constants_display.width/2);
+        testImageView.setX(constants_display.height/2);
         fragment_calibrate.addView(testImageView);
 
     }
 
-    public void offSetCalculator() {
-
-
-        //Screen Inches
-        DisplayMetrics dm = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(dm);
-        int widthtest = dm.widthPixels;
-        int heighttest = dm.heightPixels;
-        int dens = dm.densityDpi;
-        double wi = (double) widthtest / (double) dens;
-        double hi = (double) heighttest / (double) dens;
-        double xtest = Math.pow(wi, 2);
-        double ytest = Math.pow(hi, 2);
-        double screenInches = Math.sqrt(xtest + ytest);
-
-
-        //screen Pixels
-        display = wm.getDefaultDisplay();
-        size = new Point();
-        display.getSize(size);
-        width = size.x;
-        height = size.y;
-
-
-
-
-
-
-    }
 }

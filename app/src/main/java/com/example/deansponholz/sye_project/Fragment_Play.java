@@ -52,6 +52,7 @@ public class Fragment_Play extends Fragment {
 
 
     Constants_Display constants_display;
+    System_UI_Manager system_ui_manager;
 
     RelativeLayout fragment_practice;
     Integer radiusValue;
@@ -69,7 +70,9 @@ public class Fragment_Play extends Fragment {
 
         constants_display = new Constants_Display(root.getContext());
         sensorHandler = new SensorHandler(root.getContext());
+        system_ui_manager = new System_UI_Manager(getActivity());
 
+        /*
         decorView = getActivity().getWindow().getDecorView();
         uiOptions = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
@@ -93,6 +96,7 @@ public class Fragment_Play extends Fragment {
                 }
             }
         });
+        */
 
         fragment_practice = (RelativeLayout) root.findViewById(R.id.fragment_practice);
         final PracticeDrawView practiceDrawView = new PracticeDrawView(this.getActivity());
@@ -283,7 +287,8 @@ public class Fragment_Play extends Fragment {
 
     @Override
     public void onResume() {
-        decorView.setSystemUiVisibility(uiOptions);
+        system_ui_manager.decorView.setSystemUiVisibility(system_ui_manager.uiOptions);
+        //decorView.setSystemUiVisibility(uiOptions);
         super.onResume();
     }
 }

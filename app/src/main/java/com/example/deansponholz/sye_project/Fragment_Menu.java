@@ -56,7 +56,7 @@ public class Fragment_Menu extends Fragment {
     private void displayImages(View root){
 
 
-        testBitmap = constants_display.loadBitmapEfficiently(getContext(),
+        testBitmap = constants_display.loadBitmapEfficiently(root.getContext(),
                 getResources(),
                 R.drawable.trademark,
                 (int) (constants_display.width * 0.025),

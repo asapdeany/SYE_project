@@ -54,7 +54,7 @@ public class Fragment_Play extends Fragment {
     Constants_Display constants_display;
     System_UI_Manager system_ui_manager;
 
-    RelativeLayout fragment_practice;
+    RelativeLayout fragment_play;
     Integer radiusValue;
     Button button_shoot;
 
@@ -68,39 +68,16 @@ public class Fragment_Play extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_play, container, false);
 
+        //calculate screen dimensions
         constants_display = new Constants_Display(root.getContext());
         sensorHandler = new SensorHandler(root.getContext());
         system_ui_manager = new System_UI_Manager(getActivity());
 
-        /*
-        decorView = getActivity().getWindow().getDecorView();
-        uiOptions = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
-        decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener(){
-            @Override
-            public void onSystemUiVisibilityChange(int visibility) {
-                // Note that system bars will only be "visible" if none of the
-                // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
-                if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-                    // TODO: The system bars are visible. Make any desired
-                    // adjustments to your UI, such as showing the action bar or
-                    // other navigational controls.
-                    Log.d("bro", "help");
-                    //decorView.setSystemUiVisibility(uiOptions);
 
-                } else {
-                    // TODO: The system bars are NOT visible. Make any desired
-                    // adjustments to your UI, such as hiding the action bar or
-                    // other navigational controls.
-
-                }
-            }
-        });
-        */
-
-        fragment_practice = (RelativeLayout) root.findViewById(R.id.fragment_practice);
+        //fragment
+        fragment_play = (RelativeLayout) root.findViewById(R.id.fragment_play);
         final PracticeDrawView practiceDrawView = new PracticeDrawView(this.getActivity());
-        fragment_practice.addView(practiceDrawView);
+        fragment_play.addView(practiceDrawView);
 
 
 
@@ -265,11 +242,11 @@ public class Fragment_Play extends Fragment {
                     //handler.postDelayed(updateImageView, 0);
                     handler.post(updateImageView);
 
-                    fragment_practice.setBackgroundColor(Color.WHITE);
+                    fragment_play.setBackgroundColor(Color.WHITE);
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            fragment_practice.setBackgroundColor(getResources().getColor(R.color.test_purple));
+                            fragment_play.setBackgroundColor(getResources().getColor(R.color.test_purple));
 
                         }
                     },30);

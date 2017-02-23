@@ -35,9 +35,9 @@ public class Fragment_Calibrate extends Fragment {
 
     Button startButton;
 
-    Bitmap testBitmap;
-    ImageView testImageView;
+
     Constants_Display constants_display;
+    System_UI_Manager system_ui_manager;
 
     RelativeLayout fragment_calibrate;
 
@@ -46,9 +46,12 @@ public class Fragment_Calibrate extends Fragment {
         View root = inflater.inflate(R.layout.fragment_calibrate, container, false);
         wm = (WindowManager) root.getContext().getSystemService(Context.WINDOW_SERVICE);
 
+        system_ui_manager = new System_UI_Manager(getActivity());
         constants_display = new Constants_Display(root.getContext());
+
         sensorHandler = new SensorHandler(root.getContext());
         fragment_calibrate = (RelativeLayout) root.findViewById(R.id.fragment_calibrate);
+
         CalibrateDrawView calibrateDrawView = new CalibrateDrawView(this.getActivity());
         fragment_calibrate.addView(calibrateDrawView);
         System.out.print("he4lo");
@@ -103,20 +106,5 @@ public class Fragment_Calibrate extends Fragment {
 
     }
 
-    private void displayImages(){
-
-        testBitmap = constants_display.loadBitmapEfficiently(getContext(),
-                getResources(),
-                R.drawable.trademark,
-                (int) (constants_display.width * 0.05),
-                (int) (constants_display.height * 0.02));
-
-        testImageView = new ImageView(getContext());
-        testImageView.setImageBitmap(testBitmap);
-        testImageView.setX(constants_display.width/2);
-        testImageView.setX(constants_display.height/2);
-        fragment_calibrate.addView(testImageView);
-
-    }
 
 }

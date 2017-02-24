@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,11 +23,11 @@ public class Fragment_Menu extends Fragment {
 
     System_UI_Manager system_ui_manager;
     Constants_Display constants_display;
-    Button button_play;
+    Button button_play, button_play_test;
     RelativeLayout fragment_menu;
 
-    Bitmap testBitmap;
-    ImageView testImageView;
+    Bitmap bitmap_Logo;
+    ImageView iv_Logo;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -48,29 +49,44 @@ public class Fragment_Menu extends Fragment {
             }
         });
         fragment_menu = (RelativeLayout) root.findViewById(R.id.fragment_menu);
-        displayImages(root);
+        displayMenuScene(root);
 
         return root;
     }
 
-    private void displayImages(View root){
 
 
-        testBitmap = constants_display.loadBitmapEfficiently(root.getContext(),
+    private void displayMenuScene(View root){
+
+        /*
+        button_play_test = new Button(root.getContext());
+        button_play_test.setWidth(constants_display.width / 20);
+        button_play_test.setHeight(constants_display.height / 20);
+        button_play_test.setBackgroundResource(R.drawable.button_menu);
+        button_play_test.setX((float) (constants_display.width / 2));
+        button_play_test.setY((float) (constants_display.height / 2));
+        button_play_test.setText("Niggas");
+        button_play_test.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 30);
+        fragment_menu.addView(button_play_test);
+        */
+
+        //Efficiently load drawables into imageViews for Menu
+        bitmap_Logo = constants_display.loadBitmapEfficiently(root.getContext(),
                 getResources(),
                 R.drawable.trademark,
                 (int) (constants_display.width * 0.025),
                 (int) (constants_display.height * 0.008));
 
 
-        final float test = (float)(constants_display.height * 0.8);
-        final float test1 = (float)(constants_display.width * 0.020);
+        final float logoX = (float)(constants_display.height * 0.8);
+        final float logoY = (float)(constants_display.width * 0.020);
 
-        testImageView = new ImageView(root.getContext());
-        testImageView.setImageBitmap(testBitmap);
-        testImageView.setX(test1);
-        testImageView.setY(test);
-        fragment_menu.addView(testImageView);
+        iv_Logo = new ImageView(root.getContext());
+        iv_Logo.setImageBitmap(bitmap_Logo);
+        iv_Logo.setY(logoX);
+        iv_Logo.setX(logoY);
+
+        fragment_menu.addView(iv_Logo);
 
     }
 

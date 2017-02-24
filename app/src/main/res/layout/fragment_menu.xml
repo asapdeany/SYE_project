@@ -5,12 +5,20 @@
     android:layout_height="match_parent"
     android:id="@+id/fragment_menu">
 
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        app:srcCompat="@drawable/trademark"
+        android:id="@+id/imageView"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
+
     <Button
         android:id="@+id/button_play"
 
         android:text="@string/string_play"
         android:textColor="#FFFFFF"
-        android:textSize="30sp"
+        android:textSize="30dp"
 
         android:layout_width="@dimen/menu_button_size"
         android:layout_height="@dimen/menu_button_size"

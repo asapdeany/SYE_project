@@ -23,7 +23,7 @@ public class Fragment_Menu extends Fragment {
 
     System_UI_Manager system_ui_manager;
     Constants_Display constants_display;
-    Button button_play, button_play_test;
+    Button button_play;
     RelativeLayout fragment_menu;
 
     Bitmap bitmap_Logo;
@@ -44,13 +44,11 @@ public class Fragment_Menu extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), Activity_Calibrate.class);
-                //Intent intent = new Intent(getActivity(), Activity_Play.class);
                 getActivity().startActivity(intent);
             }
         });
         fragment_menu = (RelativeLayout) root.findViewById(R.id.fragment_menu);
         displayMenuScene(root);
-
         return root;
     }
 
@@ -65,7 +63,7 @@ public class Fragment_Menu extends Fragment {
         button_play_test.setBackgroundResource(R.drawable.button_menu);
         button_play_test.setX((float) (constants_display.width / 2));
         button_play_test.setY((float) (constants_display.height / 2));
-        button_play_test.setText("Niggas");
+        button_play_test.setText("");
         button_play_test.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 30);
         fragment_menu.addView(button_play_test);
         */

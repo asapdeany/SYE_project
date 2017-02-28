@@ -30,10 +30,7 @@ public class Fragment_Calibrate extends Fragment {
 
     public SensorHandler sensorHandler = null;
 
-
-    WindowManager wm;
-
-    Button startButton;
+    Button startButton, calibrateButton;
 
 
     Constants_Display constants_display;
@@ -44,7 +41,6 @@ public class Fragment_Calibrate extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_calibrate, container, false);
-        wm = (WindowManager) root.getContext().getSystemService(Context.WINDOW_SERVICE);
 
         system_ui_manager = new System_UI_Manager(getActivity());
         constants_display = new Constants_Display(root.getContext());
@@ -56,9 +52,6 @@ public class Fragment_Calibrate extends Fragment {
         fragment_calibrate.addView(calibrateDrawView);
         System.out.print("he4lo");
 
-        //displayImages();
-
-
 
         startButton = (Button) root.findViewById(R.id.button_start);
         startButton.setOnClickListener(new View.OnClickListener() {
@@ -66,6 +59,16 @@ public class Fragment_Calibrate extends Fragment {
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), Activity_Play.class);
                 getActivity().startActivity(intent);
+            }
+        });
+        calibrateButton = (Button) root.findViewById(R.id.button_calibrate);
+        calibrateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                double x = (-sensorHandler.xPos*43 + (constants_display.width)/2);
+                double y = (sensorHandler.yPos*38 + (constants_display.height)/2);
+                Log.d("X", Double.toString(x));
+                Log.d("Y", Double.toString(y));
             }
         });
         return root;
@@ -95,11 +98,11 @@ public class Fragment_Calibrate extends Fragment {
 
         @Override
         public void onDraw(Canvas canvas) {
-            canvas.drawCircle(constants_display.width / 2, constants_display.height / 2, 100, paint);
+            canvas.drawCircle(constants_display.width / 2, constants_display.height / 2, 10, paint);
 
-            canvas.drawCircle((float)(-sensorHandler.xPos*43 + (constants_display.width)/2), (float) (sensorHandler.yPos*38 + (constants_display.height)/2), 80, paint);
-            //canvas.drawLine((float) (-sensorHandler.xPos * 15), (float) (sensorHandler.yPos * 15), width / 2, height / 2, paint);
-
+            canvas.drawCircle((float)(-sensorHandler.xPos*43 + (constants_display.width)/2),
+                    (float) (sensorHandler.yPos*38 + (constants_display.height)/2),
+                    80, paint);
 
             invalidate();
         }

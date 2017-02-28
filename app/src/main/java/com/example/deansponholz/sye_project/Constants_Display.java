@@ -5,16 +5,19 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
-import java.lang.reflect.Array;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+
+import static android.content.ContentValues.TAG;
+
 
 /**
  * Created by deansponholz on 2/20/17.
@@ -24,23 +27,19 @@ public class Constants_Display {
 
     WindowManager wm;
     Display display;
-    Point size;
-    Bitmap test;
+
 
     int dens, width, height;
-    int widthtest;
-    int heighttest;
-
-    double wi, hi, xtest, ytest, screenInches;
 
 
-    int bitmapHeight, bitmapWidth;
-    String imageType;
+    double widthInches, heightInches;
+
 
 
     public Constants_Display(Context context){
 
         wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        display = wm.getDefaultDisplay();
         offSetCalculator();
     }
 
@@ -106,33 +105,59 @@ public class Constants_Display {
 
     public void offSetCalculator() {
 
+
+
         //Screen Inches
-        DisplayMetrics dm = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(dm);
-        widthtest = dm.widthPixels;
-        heighttest = dm.heightPixels;
-        dens = dm.densityDpi;
-        wi = (double) widthtest / (double) dens;
-        hi = (double) heighttest / (double) dens;
-        screenInches = Math.sqrt(xtest + ytest);
 
-        //screen Pixels
-        display = wm.getDefaultDisplay();
-        size = new Point();
-        display.getSize(size);
-        width = size.x;
-        height = size.y;
 
-        Log.d("widthtest", Integer.toString(widthtest));
-        Log.d("heighttes", Integer.toString(heighttest));
+
+        final DisplayMetrics metrics = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(metrics);
+        dens = metrics.densityDpi;
+        Method mGetRawH = null, mGetRawW = null;
+
+        try {
+            // For JellyBean 4.2 (API 17) and onward
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                display.getRealMetrics(metrics);
+
+                width = metrics.widthPixels;
+                height = metrics.heightPixels;
+            } else {
+                mGetRawH = Display.class.getMethod("getRawHeight");
+                mGetRawW = Display.class.getMethod("getRawWidth");
+
+                try {
+                    width = (Integer) mGetRawW.invoke(display);
+                    height = (Integer) mGetRawH.invoke(display);
+                    //widthInches = (double) width / (double) dens;
+                    //heightInches = (double) height / (double) dens;
+                } catch (IllegalArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        } catch (NoSuchMethodException e3) {
+            e3.printStackTrace();
+        }
+
+
+
+        String displayName = display.getName();  // minSdkVersion=17+
+        Log.i(TAG, "displayName  = " + displayName);
+
+
         Log.d("width", Integer.toString(width));
-        Log.d("heigh", Integer.toString(height));
+        Log.d("height", Integer.toString(height));
         Log.d("dens", Integer.toString(dens));
-        Log.d("wi", Double.toString(wi));
-        Log.d("hi", Double.toString(hi));
-        Log.d("xtest", Double.toString(xtest));
-        Log.d("ytest", Double.toString(ytest));
-        Log.d("screenInches", Double.toString(screenInches));
+        //Log.d("widthInches", Double.toString(widthInches));
+        //Log.d("heightInches", Double.toString(heightInches));
 
     }
 }

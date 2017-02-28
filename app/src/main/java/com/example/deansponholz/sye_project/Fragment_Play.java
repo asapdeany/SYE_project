@@ -93,6 +93,7 @@ public class Fragment_Play extends Fragment {
             @Override
             public void onClick(View v) {
 
+
                 if (radiusValue > 2)
                     radiusValue = radiusValue - 2;
             }
@@ -165,7 +166,7 @@ public class Fragment_Play extends Fragment {
         @Override
         public void onDraw(Canvas canvas){
             canvas.drawCircle((float)(-sensorHandler.xPos*43 + (constants_display.width)/2), (float) (sensorHandler.yPos*38 + ((constants_display.height)/2)), radiusValue, paint);
-            testGun0.setX((float)(-sensorHandler.xPos*20 + ((constants_display.width/2) - bitmap0.getWidth()/constants_display.hi)));
+            testGun0.setX((float)(-sensorHandler.xPos*20 + (constants_display.width)/2) - (bitmap0.getWidth()/2));
             invalidate();
         }
     }
@@ -182,12 +183,15 @@ public class Fragment_Play extends Fragment {
 
             int i = 0;
             public void run() {
+
+                button_shoot.setVisibility(View.GONE);
                 if (i <= imgList.size()-1){
                     testGun0.setImageBitmap(imgList.get(i));
                     i++;
                 }
                 if (i > imgList.size()-1){
                     i = 0;
+                    button_shoot.setVisibility(View.VISIBLE);
                     return;
                 }
                 handler.postDelayed(this, 90);

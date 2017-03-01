@@ -110,10 +110,6 @@ public class Fragment_Play extends Fragment {
         bitmap3 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_3);
         bitmap4 = BitmapFactory.decodeResource(getResources(), R.drawable.image_gun_4);
 
-
-
-
-
         imgList.add(bitmap0);
         imgList.add(bitmap1);
         imgList.add(bitmap2);
@@ -129,10 +125,8 @@ public class Fragment_Play extends Fragment {
  
 
     public void reload(){
+
         final Handler handler = new Handler();
-
-
-
         reloadAnimation = new Runnable() {
             public void run() {
 

@@ -1,9 +1,5 @@
 package com.example.deansponholz.sye_project;
 
-import org.andengine.entity.scene.IOnSceneTouchListener;
-import org.andengine.input.sensor.acceleration.IAccelerationListener;
-import org.andengine.ui.activity.SimpleBaseGameActivity;
-
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
@@ -30,8 +26,8 @@ import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.math.MathUtils;
 
-import android.content.res.Resources;
 import android.hardware.SensorManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.badlogic.gdx.math.Vector2;
@@ -91,14 +87,9 @@ public class Physics_Example extends SimpleBaseGameActivity implements IAccelera
     public void onCreateResources() {
         BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
 
-
-
         this.mBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 64, 64, TextureOptions.BILINEAR);
-
-        this.mBoxFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromResource(this.mBitmapTextureAtlas, getResources(), R.drawable.trademark, 0, 0, 2, 1);
-        this.mCircleFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromResource(this.mBitmapTextureAtlas, getResources(), R.drawable.button_menu, 0, 32, 2, 1);
-        //this.mBoxFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas, this, "face_box_tiled.png", 0, 0, 2, 1); // 64x32
-        //this.mCircleFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas, this, "face_circle_tiled.png", 0, 32, 2, 1); // 64x32
+        this.mBoxFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas, this, "pidgey_0.png", 0, 0, 2, 1); // 64x32
+        this.mCircleFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas, this, "face_circle_tiled.png", 0, 32, 2, 1); // 64x32
         this.mBitmapTextureAtlas.load();
     }
 
@@ -139,6 +130,7 @@ public class Physics_Example extends SimpleBaseGameActivity implements IAccelera
         if(this.mPhysicsWorld != null) {
             if(pSceneTouchEvent.isActionDown()) {
                 this.addFace(pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
+                Log.d("touch", "touch");
                 return true;
             }
         }
@@ -186,15 +178,15 @@ public class Physics_Example extends SimpleBaseGameActivity implements IAccelera
 
         if(this.mFaceCount % 2 == 0) {
             face = new AnimatedSprite(pX, pY, this.mCircleFaceTextureRegion, this.getVertexBufferObjectManager());
-            face.setScale(MathUtils.random(0.5f, 1.25f));
-            body = PhysicsFactory.createCircleBody(this.mPhysicsWorld, face, BodyType.DynamicBody, objectFixtureDef);
+            //face.setScale(MathUtils.random(0.5f, 1.25f));
+            body = PhysicsFactory.createCircleBody(this.mPhysicsWorld, face, BodyType.KinematicBody, objectFixtureDef);
         } else {
             face = new AnimatedSprite(pX, pY, this.mBoxFaceTextureRegion, this.getVertexBufferObjectManager());
-            face.setScale(MathUtils.random(0.5f, 1.25f));
+            //face.setScale(MathUtils.random(0.5f, 1.25f));
             body = PhysicsFactory.createBoxBody(this.mPhysicsWorld, face, BodyType.DynamicBody, objectFixtureDef);
         }
 
-        face.animate(200);
+        //face.animate(200);
 
         this.mScene.attachChild(face);
         this.mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(face, body, true, true));

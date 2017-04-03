@@ -43,7 +43,7 @@ public class Constants_Display {
         offSetCalculator();
     }
 
-    public Bitmap loadBitmapEfficiently(Context context, Resources res, int resId, int reqWidth, int reqHeight){
+    public static Bitmap loadBitmapEfficiently(Context context, Resources res, int resId, int reqWidth, int reqHeight){
 
 
         // First decode with inJustDecodeBounds=true to check dimensions

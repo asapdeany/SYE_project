@@ -31,7 +31,7 @@ public class System_UI_Manager {
                     // TODO: The system bars are visible. Make any desired
                     // adjustments to your UI, such as showing the action bar or
                     // other navigational controls.
-                    Log.d("bro", "help");
+
                     //decorView.setSystemUiVisibility(uiOptions);
 
                 } else {

@@ -1,5 +1,6 @@
 package com.example.deansponholz.sye_project;
 
+
 import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -84,7 +85,8 @@ public class Fragment_Menu extends Fragment {
         iv_Logo.setY(logoX);
         iv_Logo.setX(logoY);
 
-        fragment_menu.addView(iv_Logo);
+        //
+         fragment_menu.addView(iv_Logo);
 
     }
 

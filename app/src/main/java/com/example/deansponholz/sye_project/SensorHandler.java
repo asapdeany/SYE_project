@@ -12,7 +12,6 @@ public class SensorHandler {
 
 
     SensorData s = null;
-    //HUDFragment hudFragment = null;
 
     public double accelmagZ, accelmagX, accelmagY;
     public double gyroZ, gyroX, gyroY;
@@ -21,7 +20,7 @@ public class SensorHandler {
 
     public SensorHandler(Context context) {
         s = new SensorData((SensorManager) context.getSystemService(Context.SENSOR_SERVICE), this);
-        //hudFragment = new HUDFragment();
+
     }
 
     public void setAccelMagValues(float[] values) {

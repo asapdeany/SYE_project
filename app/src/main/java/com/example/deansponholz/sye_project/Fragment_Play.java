@@ -29,6 +29,33 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 import java.util.List;
 
+////////
+
+import org.andengine.engine.camera.Camera;
+import org.andengine.engine.options.EngineOptions;
+import org.andengine.engine.options.ScreenOrientation;
+import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.IOnSceneTouchListener;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.sprite.AnimatedSprite;
+import org.andengine.entity.util.FPSLogger;
+import org.andengine.extension.physics.box2d.PhysicsConnector;
+import org.andengine.extension.physics.box2d.PhysicsFactory;
+import org.andengine.extension.physics.box2d.PhysicsWorld;
+import org.andengine.extension.physics.box2d.util.Vector2Pool;
+import org.andengine.input.sensor.acceleration.AccelerationData;
+import org.andengine.input.sensor.acceleration.IAccelerationListener;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
+import org.andengine.opengl.texture.region.ITiledTextureRegion;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
+import org.andengine.ui.activity.SimpleBaseGameActivity;
+import org.andengine.util.debug.Debug;
+import org.andengine.util.math.MathUtils;
 
 import static android.R.attr.bitmap;
 
@@ -159,7 +186,7 @@ public class Fragment_Play extends Fragment {
 
         @Override
         public void onDraw(Canvas canvas){
-            canvas.drawCircle((float)(-sensorHandler.xPos*43 + (constants_display.width)/2), (float) (sensorHandler.yPos*38 + ((constants_display.height)/2)), radiusValue, paint);
+            canvas.drawCircle((float)(-sensorHandler.xPos*43 + (constants_display.width)/2), (float) (sensorHandler.yPos*38 + ((constants_display.height)/2) - Constants_Display.difference), radiusValue, paint);
             testGun0.setX((float)(-sensorHandler.xPos*20 + (constants_display.width)/2) - (bitmap0.getWidth()/2));
             invalidate();
         }
@@ -240,11 +267,11 @@ public class Fragment_Play extends Fragment {
                     //handler.postDelayed(updateImageView, 0);
                     handler.post(updateImageView);
 
-                    fragment_play.setBackgroundColor(Color.WHITE);
+                    fragment_play.setBackgroundColor(Color.RED);
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            fragment_play.setBackgroundColor(getResources().getColor(R.color.test_purple));
+                            fragment_play.setBackground(getResources().getDrawable(R.drawable.fishery_android));
 
                         }
                     },30);

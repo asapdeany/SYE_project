@@ -50,14 +50,14 @@ public class Fragment_Calibrate extends Fragment {
 
         CalibrateDrawView calibrateDrawView = new CalibrateDrawView(this.getActivity());
         fragment_calibrate.addView(calibrateDrawView);
-        System.out.print("he4lo");
+
 
 
         startButton = (Button) root.findViewById(R.id.button_start);
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), Activity_Play.class);
+                Intent intent = new Intent(getActivity(), Physics_Example.class);
                 getActivity().startActivity(intent);
             }
         });
@@ -65,10 +65,13 @@ public class Fragment_Calibrate extends Fragment {
         calibrateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                double x = (-sensorHandler.xPos*43 + (constants_display.width)/2);
-                double y = (sensorHandler.yPos*38 + (constants_display.height)/2);
-                Log.d("X", Double.toString(x));
-                Log.d("Y", Double.toString(y));
+                Constants_Display.difference = 0;
+                double center = (constants_display.height / 2);
+                double currentY = (sensorHandler.yPos*38 + (constants_display.height)/2);
+                //Log.d("Y", Double.toString(currentY));
+                Constants_Display.difference = currentY - center;
+                Log.d("difference", Double.toString(Constants_Display.difference));
+
             }
         });
         return root;
@@ -101,7 +104,7 @@ public class Fragment_Calibrate extends Fragment {
             canvas.drawCircle(constants_display.width / 2, constants_display.height / 2, 10, paint);
 
             canvas.drawCircle((float)(-sensorHandler.xPos*43 + (constants_display.width)/2),
-                    (float) (sensorHandler.yPos*38 + (constants_display.height)/2),
+                    (float) (sensorHandler.yPos*38 + ((constants_display.height)/2) - Constants_Display.difference),
                     80, paint);
 
             invalidate();

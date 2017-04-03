@@ -33,6 +33,7 @@ public class Constants_Display {
 
     double widthInches, heightInches;
 
+    public static double difference;
 
 
     public Constants_Display(Context context){

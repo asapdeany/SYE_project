@@ -29,6 +29,9 @@
         <activity android:name=".Activity_Calibrate"
             android:screenOrientation="landscape">
         </activity>
+        <activity android:name=".Physics_Example"
+            android:screenOrientation="landscape">
+        </activity>
     </application>
 
 </manifest>

@@ -8,7 +8,10 @@ import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.scene.background.SpriteBackground;
+import org.andengine.entity.shape.IAreaShape;
 import org.andengine.entity.sprite.AnimatedSprite;
+import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.util.FPSLogger;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
@@ -17,12 +20,16 @@ import org.andengine.extension.physics.box2d.util.Vector2Pool;
 import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.TextureOptions;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
 import org.andengine.opengl.texture.region.ITiledTextureRegion;
+import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
+import org.andengine.util.Constants;
+import org.andengine.util.color.Color;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.math.MathUtils;
 
@@ -41,11 +48,11 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 
 public class Physics_Example extends SimpleBaseGameActivity implements IAccelerationListener, IOnSceneTouchListener {
     // ===========================================================
-    // Constants
+    // Constants https://github.com/m5/andengine-pixel-perfect
     // ===========================================================
 
-    protected static final int CAMERA_WIDTH = 720;
-    protected static final int CAMERA_HEIGHT = 480;
+    protected static final int CAMERA_WIDTH = 731;
+    protected static final int CAMERA_HEIGHT = 411;
 
     // ===========================================================
     // Fields
@@ -59,6 +66,9 @@ public class Physics_Example extends SimpleBaseGameActivity implements IAccelera
     protected ITiledTextureRegion mCircleFaceTextureRegion;
 
     protected PhysicsWorld mPhysicsWorld;
+
+    private TextureRegion mBgTexture;
+    private BitmapTextureAtlas mBackgroundTexture;
 
     private int mFaceCount = 0;
 
@@ -88,17 +98,34 @@ public class Physics_Example extends SimpleBaseGameActivity implements IAccelera
         BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
 
         this.mBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 64, 64, TextureOptions.BILINEAR);
-        this.mBoxFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas, this, "pidgey_0.png", 0, 0, 2, 1); // 64x32
-        this.mCircleFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas, this, "face_circle_tiled.png", 0, 32, 2, 1); // 64x32
+        //his.mBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 128, 128, TextureOptions.BILINEAR);
+
+        //this.mBoxFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapTextureAtlas, this, "pidgey_0.png", 0, 0);
+        this.mBoxFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas, this, "pidgey_0.png", 0, 0, 1, 1); // 64x32
+        //this.mCircleFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas, this, "face_circle_tiled.png", 0, 32, 2, 1); // 64x32
+
+
+        this.mBackgroundTexture = new BitmapTextureAtlas(getTextureManager(), 1024, 1024);
+        mBgTexture = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBackgroundTexture, this, "fishery.jpg", 0, 0);
+
+        this.mEngine.getTextureManager().loadTexture(this.mBackgroundTexture);
+
         this.mBitmapTextureAtlas.load();
     }
 
     @Override
     public Scene onCreateScene() {
+
         this.mEngine.registerUpdateHandler(new FPSLogger());
 
+
         this.mScene = new Scene();
-        this.mScene.setBackground(new Background(0, 0, 0));
+
+        final int centerX = (int) (CAMERA_WIDTH - mBgTexture.getWidth()) / 2;
+        final int centerY = (int) (CAMERA_HEIGHT - mBgTexture.getHeight()) / 2;
+        SpriteBackground bg = new SpriteBackground(new Sprite(centerX, centerY, mBgTexture, getVertexBufferObjectManager()));
+        this.mScene.setBackground(bg);
+        //this.mScene.setBackground(new Background(255, 255, 255));
         this.mScene.setOnSceneTouchListener(this);
 
         this.mPhysicsWorld = new PhysicsWorld(new Vector2(0, SensorManager.GRAVITY_EARTH), false);
@@ -177,12 +204,16 @@ public class Physics_Example extends SimpleBaseGameActivity implements IAccelera
         final FixtureDef objectFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
 
         if(this.mFaceCount % 2 == 0) {
-            face = new AnimatedSprite(pX, pY, this.mCircleFaceTextureRegion, this.getVertexBufferObjectManager());
-            //face.setScale(MathUtils.random(0.5f, 1.25f));
-            body = PhysicsFactory.createCircleBody(this.mPhysicsWorld, face, BodyType.KinematicBody, objectFixtureDef);
-        } else {
+            //face = new AnimatedSprite(pX, pY, this.mCircleFaceTextureRegion, this.getVertexBufferObjectManager());
             face = new AnimatedSprite(pX, pY, this.mBoxFaceTextureRegion, this.getVertexBufferObjectManager());
             //face.setScale(MathUtils.random(0.5f, 1.25f));
+            body = PhysicsFactory.createCircleBody(this.mPhysicsWorld, face, BodyType.KinematicBody, objectFixtureDef);
+
+        } else {
+
+            face = new AnimatedSprite(pX, pY, this.mBoxFaceTextureRegion, this.getVertexBufferObjectManager());
+            //face.setScale(MathUtils.random(0.5f, 1.25f));
+
             body = PhysicsFactory.createBoxBody(this.mPhysicsWorld, face, BodyType.DynamicBody, objectFixtureDef);
         }
 

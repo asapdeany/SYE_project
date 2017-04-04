@@ -28,7 +28,7 @@ public class Constants_Display {
     Display display;
 
 
-    int dens, width, height;
+    static int dens, width, height;
 
 
     double widthInches, heightInches;

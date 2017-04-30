@@ -57,7 +57,7 @@ public class Fragment_Calibrate extends Fragment {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), Physics_Example.class);
+                Intent intent = new Intent(getActivity(), GameActivity.class);
                 getActivity().startActivity(intent);
             }
         });
@@ -112,5 +112,9 @@ public class Fragment_Calibrate extends Fragment {
 
     }
 
-
+    @Override
+    public void onResume() {
+        system_ui_manager.hideView();
+        super.onResume();
+    }
 }

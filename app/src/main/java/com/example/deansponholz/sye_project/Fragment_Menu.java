@@ -67,7 +67,7 @@ public class Fragment_Menu extends Fragment {
         button_play_test.setText("");
         button_play_test.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 30);
         fragment_menu.addView(button_play_test);
-        */
+
 
         //Efficiently load drawables into imageViews for Menu
         bitmap_Logo = constants_display.loadBitmapEfficiently(root.getContext(),
@@ -76,6 +76,7 @@ public class Fragment_Menu extends Fragment {
                 (int) (constants_display.width * 0.025),
                 (int) (constants_display.height * 0.008));
 
+        */
 
         final float logoX = (float)(constants_display.height * 0.8);
         final float logoY = (float)(constants_display.width * 0.020);
@@ -90,4 +91,9 @@ public class Fragment_Menu extends Fragment {
 
     }
 
+    @Override
+    public void onResume() {
+        system_ui_manager.hideView();
+        super.onResume();
+    }
 }

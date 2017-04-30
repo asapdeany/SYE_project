@@ -153,9 +153,9 @@ public class Constants_Display {
         Log.i(TAG, "displayName  = " + displayName);
 
 
-        Log.d("width", Integer.toString(width));
-        Log.d("height", Integer.toString(height));
-        Log.d("dens", Integer.toString(dens));
+        //Log.d("width", Integer.toString(width));
+        //Log.d("height", Integer.toString(height));
+        //Log.d("dens", Integer.toString(dens));
         //Log.d("widthInches", Double.toString(widthInches));
         //Log.d("heightInches", Double.toString(heightInches));
 

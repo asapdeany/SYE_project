@@ -16,10 +16,15 @@ public class System_UI_Manager {
 
     View decorView;
     Integer uiOptions;
+    Activity callingActivity;
     public System_UI_Manager(Activity activity){
+        callingActivity = activity;
 
+    }
 
-        decorView = activity.getWindow().getDecorView();
+    public void hideView(){
+
+        decorView = callingActivity.getWindow().getDecorView();
         uiOptions = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
         decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener(){

@@ -1,5 +1,6 @@
 package com.example.deansponholz.sye_project;
 
+import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -15,6 +16,8 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Shape;
 
 import org.andengine.engine.camera.Camera;
+import org.andengine.engine.handler.timer.ITimerCallback;
+import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.WakeLockOptions;
@@ -29,10 +32,13 @@ import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.SpriteBackground;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.font.Font;
+import org.andengine.opengl.font.FontFactory;
 import org.andengine.opengl.texture.TextureOptions;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
@@ -84,8 +90,15 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
     private SensorManager mSensorManager;
     private SensorHandler sensorHandler;
 
+    private TimerHandler timerHandler;
+
+    //HUD
+    private Text startTimerText;
+    private BitmapTextureAtlas fontTexture;
+    private Font gameFont;
+
     //This represents the sprite sheet(image) rows and columns
-    //We have 4 Rows and 2 Columns
+    //We have 3 Rows and 3 Columns
     private static int   SPR_COLUMN  = 3;
     private static int   SPR_ROWS  = 3;
 
@@ -115,6 +128,38 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
         //SET ASSET PATH
         BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
+        FontFactory.setAssetBasePath("font/");
+
+        //Timers
+        timerHandler = new TimerHandler(1, true,new ITimerCallback() {
+
+            int secondCount = 3;
+
+            @Override
+            public void onTimePassed(final TimerHandler pTimerHandler) {
+
+                secondCount--;
+                startTimerText.setText(Integer.toString(secondCount));
+
+                if (secondCount <=0){
+                    m_Scene.unregisterUpdateHandler(timerHandler);
+                    m_Scene.detachChild(startTimerText);
+                    
+                    //startGame
+                }
+            }
+        });
+
+        //HUD
+        fontTexture = new BitmapTextureAtlas(this.getTextureManager(), 512, 512, TextureOptions.BILINEAR);
+        gameFont = FontFactory.createFromAsset(this.getFontManager(),
+                fontTexture, this.getAssets(),
+                "Droid.ttf", 200, true,
+                android.graphics.Color.RED);
+        fontTexture.load();
+        gameFont.load();
+        startTimerText = new Text(CAMERA_WIDTH/2, CAMERA_HEIGHT/2, gameFont, "3", this.getVertexBufferObjectManager());
+        startTimerText.setPosition((CAMERA_WIDTH/2) - startTimerText.getWidth()/2, (CAMERA_HEIGHT/2) - startTimerText.getHeight()/2);
 
         //BACKGROUND
         textureBackground = new BitmapTextureAtlas(getTextureManager(), 900, 654);
@@ -182,6 +227,9 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         mSensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI);
         sensorHandler = new SensorHandler(this);
 
+        m_Scene.attachChild(startTimerText);
+        m_Scene.registerUpdateHandler(timerHandler);
+
         return m_Scene;
 
     }
@@ -193,7 +241,7 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
         switch (myEventAction){
             case MotionEvent.ACTION_DOWN:
-                spriteCrosshair.registerEntityModifier(new ScaleModifier(2, 1, 0));
+                spriteCrosshair.registerEntityModifier(new ScaleModifier(1.45f, 1, 0));
                 //spriteCrosshair.setScale(spriteCrosshair.getScaleX()/1.05f, spriteCrosshair.getScaleY()/1.05f);
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -214,11 +262,7 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
         return false;
     }
-    @Override
-    protected synchronized void onResume() {
-        system_ui_manager.hideView();
-        super.onResume();
-    }
+
 
     public void initListeners(){
 
@@ -237,6 +281,9 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+
+        //MUST PUT ALL THIS MATH IN THE SENSOR HANDLER
+        //ROOKIE FUCKING CODE
         spriteCrosshair.setPosition((float)-sensorHandler.xPos * 43 + (CAMERA_WIDTH/2 -(textureCrosshair.getWidth()/2)),
                 (float)(sensorHandler.yPos * 43 + (CAMERA_HEIGHT/2) - Constants_Display.difference));
 
@@ -246,5 +293,11 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    @Override
+    protected synchronized void onResume() {
+        system_ui_manager.hideView();
+        super.onResume();
     }
 }

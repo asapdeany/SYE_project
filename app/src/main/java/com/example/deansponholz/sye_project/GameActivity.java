@@ -52,7 +52,9 @@ import org.andengine.util.Constants;
 import org.andengine.util.color.Color;
 import org.andengine.util.debug.Debug;
 
+import java.math.BigDecimal;
 import java.security.spec.EllipticCurve;
+import java.util.ArrayList;
 
 /**
  * Created by deansponholz on 4/29/17.
@@ -86,17 +88,34 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
     private TextureRegion regionCrosshair;
     private Sprite spriteCrosshair;
 
+    //SENSORS
     private Sensor sensor;
     private SensorManager mSensorManager;
     private SensorHandler sensorHandler;
 
-    private TimerHandler timerHandler;
+    //DISKS
+    private BitmapTextureAtlas textureRedDisk;
+    private TextureRegion regionRedDisk;
+    private Sprite spriteRedDisk0, spriteRedDisk1, spriteRedDisk2;
+
+    private BitmapTextureAtlas textureBlueDisk;
+    private TextureRegion regionBlueDisk;
+    private Sprite spriteBlueDisk0, spriteBlueDisk1, spriteBlueDisk2;
+
+    ArrayList<Sprite> diskArrayList = new ArrayList<Sprite>();
+
+    //TIMERS
+    private TimerHandler countDownTimerHandler;
+    private TimerHandler releaseDiskTimerHandler;
+    private float releaseDiskTimeRate = 3;
+
 
     //HUD
-    private Text startTimerText;
-    private BitmapTextureAtlas fontTexture;
-    private Font gameFont;
-
+    private Text startTimerText, gameLevelText;
+    private BitmapTextureAtlas startTimerFontTexture, gameLevelFontTexture;
+    private Font countdownFont, levelFont;
+    private int levelCount = 1;
+    private int hitCount = 0;
     //This represents the sprite sheet(image) rows and columns
     //We have 3 Rows and 3 Columns
     private static int   SPR_COLUMN  = 3;
@@ -130,36 +149,33 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
         FontFactory.setAssetBasePath("font/");
 
-        //Timers
-        timerHandler = new TimerHandler(1, true,new ITimerCallback() {
-
-            int secondCount = 3;
-
-            @Override
-            public void onTimePassed(final TimerHandler pTimerHandler) {
-
-                secondCount--;
-                startTimerText.setText(Integer.toString(secondCount));
-
-                if (secondCount <=0){
-                    m_Scene.unregisterUpdateHandler(timerHandler);
-                    m_Scene.detachChild(startTimerText);
-                    
-                    //startGame
-                }
-            }
-        });
-
         //HUD
-        fontTexture = new BitmapTextureAtlas(this.getTextureManager(), 512, 512, TextureOptions.BILINEAR);
-        gameFont = FontFactory.createFromAsset(this.getFontManager(),
-                fontTexture, this.getAssets(),
+        startTimerFontTexture = new BitmapTextureAtlas(this.getTextureManager(), 512, 512, TextureOptions.BILINEAR);
+        countdownFont = FontFactory.createFromAsset(this.getFontManager(),
+                startTimerFontTexture, this.getAssets(),
                 "Droid.ttf", 200, true,
                 android.graphics.Color.RED);
-        fontTexture.load();
-        gameFont.load();
-        startTimerText = new Text(CAMERA_WIDTH/2, CAMERA_HEIGHT/2, gameFont, "3", this.getVertexBufferObjectManager());
+        startTimerFontTexture.load();
+        countdownFont.load();
+
+        gameLevelFontTexture = new BitmapTextureAtlas(getTextureManager(), 256, 256);
+        levelFont = FontFactory.createFromAsset(this.getFontManager(),
+                gameLevelFontTexture, this.getAssets(),
+                "Droid.ttf", 100, true,
+                android.graphics.Color.RED);
+        gameLevelFontTexture.load();
+        levelFont.load();
+
+
+        startTimerText = new Text(CAMERA_WIDTH/2, CAMERA_HEIGHT/2, countdownFont, "3", this.getVertexBufferObjectManager());
         startTimerText.setPosition((CAMERA_WIDTH/2) - startTimerText.getWidth()/2, (CAMERA_HEIGHT/2) - startTimerText.getHeight()/2);
+
+        gameLevelText = new Text(0, 0, levelFont, ("Game Level: " + levelCount), this.getVertexBufferObjectManager());
+
+
+
+
+
 
         //BACKGROUND
         textureBackground = new BitmapTextureAtlas(getTextureManager(), 900, 654);
@@ -182,17 +198,86 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
                 regionGun,
                 getVertexBufferObjectManager());
 
+        //CROSSHAIR
         textureCrosshair = new BitmapTextureAtlas(getTextureManager(), 225, 225);
         regionCrosshair = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.textureCrosshair, this, "crosshair.png", 0, 0);
         textureCrosshair.load();
         spriteCrosshair = new Sprite(CAMERA_WIDTH/2 - (textureCrosshair.getWidth()/2), CAMERA_HEIGHT/2, regionCrosshair, getVertexBufferObjectManager());
         //spriteCrosshair = new Sprite(CAMERA_WIDTH/2, CAMERA_HEIGHT/2,
 
+        //DISKS
+        textureRedDisk = new BitmapTextureAtlas(getTextureManager(), 102, 28);
+        //textureBlueDisk = new BitmapTextureAtlas(getTextureManager(), 102, 28);
+        regionRedDisk = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.textureRedDisk, this, "disk_red.png", 0, 0);
+        //regionBlueDisk = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.textureBlueDisk, this, "disk_blue.png", 0, 0);
+        textureRedDisk.load();
+        //textureBlueDisk.load();
+
+        spriteRedDisk0 = new Sprite(300, 400, 230, 65, regionRedDisk, getVertexBufferObjectManager());
+        spriteRedDisk1 = new Sprite(300, 600, 230, 65, regionRedDisk, getVertexBufferObjectManager());
+        spriteRedDisk2 = new Sprite(300, 800, 230, 65, regionRedDisk, getVertexBufferObjectManager());
+
+
+        diskArrayList.add(spriteRedDisk0);
+        diskArrayList.add(spriteRedDisk1);
+        diskArrayList.add(spriteRedDisk2);
+
+
+
+
+        //Timers
+        countDownTimerHandler = new TimerHandler(1, true,new ITimerCallback() {
+
+            int secondCount = 3;
+
+            @Override
+            public void onTimePassed(final TimerHandler pTimerHandler) {
+
+                secondCount--;
+                startTimerText.setText(Integer.toString(secondCount));
+
+                if (secondCount == 1) {
+                    startGame();
+                }
+
+                if (secondCount <=0){
+                    m_Scene.unregisterUpdateHandler(countDownTimerHandler);
+                    m_Scene.detachChild(startTimerText);
+                    //startGame
+
+                }
+            }
+        });
+
+        releaseDiskTimerHandler = new TimerHandler(releaseDiskTimeRate, true,new ITimerCallback() {
+
+            int diskCount = 3;
+
+            @Override
+            public void onTimePassed(final TimerHandler pTimerHandler) {
+
+                m_Scene.attachChild(diskArrayList.get(diskCount-1));
+                Log.d("bro", "newShot");
+                diskCount--;
+
+
+
+                if (diskCount <=0){
+                    Log.d("bro", "TIMEROVER");
+                    m_Scene.unregisterUpdateHandler(releaseDiskTimerHandler);
+
+                    //startGame
+                }
+            }
+        });
+
+
     }
 
     @Override
     protected Scene onCreateScene() {
 
+        //SET SCENE
         m_Scene = new Scene();
         m_Scene.setBackground(spriteBackground);
         m_Scene.setOnSceneTouchListener(this);
@@ -228,7 +313,8 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         sensorHandler = new SensorHandler(this);
 
         m_Scene.attachChild(startTimerText);
-        m_Scene.registerUpdateHandler(timerHandler);
+        m_Scene.attachChild(gameLevelText);
+        m_Scene.registerUpdateHandler(countDownTimerHandler);
 
         return m_Scene;
 
@@ -248,11 +334,27 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
                 break;
             case MotionEvent.ACTION_UP:
+
+
                 //THIS MADE MY LIFE VERY EASY
                 if (spriteGun.isAnimationRunning()){
                     break;
                 }
                 else{
+                    final Rectangle playerShot = new Rectangle(spriteCrosshair.getX() + (spriteCrosshair.getWidth()/2),
+                            spriteCrosshair.getY() + (spriteCrosshair.getHeight() / 2),
+                            60, 60, getVertexBufferObjectManager());
+                    playerShot.setVisible(false);
+                    pScene.attachChild(playerShot);
+                    try {
+                        isCollides(spriteRedDisk0, playerShot);
+                        isCollides(spriteRedDisk1, playerShot);
+                        isCollides(spriteRedDisk2, playerShot);
+                        pScene.detachChild(playerShot);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                     spriteGun.animate(100, false);
                     spriteCrosshair.clearEntityModifiers();
                     spriteCrosshair.setScale(1.0f, 1.0f);
@@ -261,6 +363,31 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         }
 
         return false;
+    }
+
+    public void startGame(){
+        m_Scene.registerUpdateHandler(releaseDiskTimerHandler);
+
+    }
+
+    public boolean isCollides(Sprite diskSprite ,Rectangle playerShot) throws Exception{
+
+
+        float diffX = Math.abs( (diskSprite.getX() +  diskSprite.getWidth()/2 )-
+                (playerShot.getX() + playerShot.getWidth()/2 ));
+        float diffY = Math.abs( (diskSprite.getY() +  diskSprite.getHeight()/2 )-
+                (playerShot.getY() + playerShot.getHeight()/2 ));
+
+        if(diffX < (diskSprite.getWidth()/2 + playerShot.getWidth()/3)
+                && diffY < (diskSprite.getHeight()/2 + playerShot.getHeight()/3)){
+
+            m_Scene.detachChild(diskSprite);
+            hitCount++;
+            Log.d("HIT", "HIT");
+            return true;
+        }else
+            Log.d("Miss", "Miss");
+            return false;
     }
 
 

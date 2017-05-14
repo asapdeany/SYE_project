@@ -15,7 +15,7 @@ public class SensorHandler {
 
     public double accelmagZ, accelmagX, accelmagY;
     public double gyroZ, gyroX, gyroY;
-    public double zPos, xPos, yPos;
+    public static double zPos, xPos, yPos;
 
 
     public SensorHandler(Context context) {

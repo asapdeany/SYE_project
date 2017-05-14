@@ -1,9 +1,5 @@
 package com.example.deansponholz.sye_project;
 
-import android.graphics.Typeface;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -11,9 +7,12 @@ import android.view.MotionEvent;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.Shape;
+import com.badlogic.gdx.physics.box2d.Manifold;
 
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.timer.ITimerCallback;
@@ -21,20 +20,21 @@ import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.WakeLockOptions;
-import org.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
-import org.andengine.engine.options.resolutionpolicy.IResolutionPolicy;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.andengine.entity.modifier.MoveModifier;
 import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
-import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.SpriteBackground;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
+import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
+import org.andengine.extension.physics.box2d.util.Vector2Pool;
+import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.font.Font;
@@ -45,22 +45,15 @@ import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegion
 import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
-import org.andengine.ui.IGameInterface;
-import org.andengine.ui.activity.BaseGameActivity;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
-import org.andengine.util.Constants;
-import org.andengine.util.color.Color;
-import org.andengine.util.debug.Debug;
 
-import java.math.BigDecimal;
-import java.security.spec.EllipticCurve;
 import java.util.ArrayList;
 
 /**
  * Created by deansponholz on 4/29/17.
  */
 
-public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouchListener, SensorEventListener{
+public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouchListener, IAccelerationListener{
 
     //Instance Data
     public static final int CAMERA_WIDTH = Constants_Display.width;
@@ -70,6 +63,8 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
     //Physics
     protected PhysicsWorld mPhysicsWorld;
+    FixtureDef objectFixtureDef;
+    Rectangle ground;
 
     //Background
     private TextureRegion regionBackground;
@@ -82,32 +77,37 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
     private TiledTextureRegion regionGun;
     private AnimatedSprite spriteGun;
 
+    //PlayerShot
+    private Rectangle playerShot;
+    private boolean isBulletThere = false;
+
     //Crosshair
     private Double crosshairHeight, crosshairWidth;
     private BitmapTextureAtlas textureCrosshair;
     private TextureRegion regionCrosshair;
     private Sprite spriteCrosshair;
+    private boolean isSpriteShrinking;
 
-    //SENSORS
-    private Sensor sensor;
-    private SensorManager mSensorManager;
-    private SensorHandler sensorHandler;
 
     //DISKS
     private BitmapTextureAtlas textureRedDisk;
     private TextureRegion regionRedDisk;
     private Sprite spriteRedDisk0, spriteRedDisk1, spriteRedDisk2;
+    private float diskFireRate;
 
+    /*
     private BitmapTextureAtlas textureBlueDisk;
     private TextureRegion regionBlueDisk;
     private Sprite spriteBlueDisk0, spriteBlueDisk1, spriteBlueDisk2;
+    */
 
     ArrayList<Sprite> diskArrayList = new ArrayList<Sprite>();
+    MoveModifier modifierDiskMovement0, modifierDiskMovement1, modifierDiskMovement2;
 
     //TIMERS
     private TimerHandler countDownTimerHandler;
     private TimerHandler releaseDiskTimerHandler;
-    private float releaseDiskTimeRate = 3;
+    private TimerHandler bulletHideTimerHandler;
 
 
     //HUD
@@ -116,10 +116,15 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
     private Font countdownFont, levelFont;
     private int levelCount = 1;
     private int hitCount = 0;
+    private int diskCount = 0;
     //This represents the sprite sheet(image) rows and columns
     //We have 3 Rows and 3 Columns
     private static int   SPR_COLUMN  = 3;
     private static int   SPR_ROWS  = 3;
+
+    boolean didDiskFall = false;
+
+    Body diskBody, roofBody, bottomBody, leftBody, rightBody, bulletBody;
 
     @Override
     public EngineOptions onCreateEngineOptions() {
@@ -158,7 +163,7 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         startTimerFontTexture.load();
         countdownFont.load();
 
-        gameLevelFontTexture = new BitmapTextureAtlas(getTextureManager(), 256, 256);
+        gameLevelFontTexture = new BitmapTextureAtlas(getTextureManager(), 2048, 2048);
         levelFont = FontFactory.createFromAsset(this.getFontManager(),
                 gameLevelFontTexture, this.getAssets(),
                 "Droid.ttf", 100, true,
@@ -171,10 +176,6 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         startTimerText.setPosition((CAMERA_WIDTH/2) - startTimerText.getWidth()/2, (CAMERA_HEIGHT/2) - startTimerText.getHeight()/2);
 
         gameLevelText = new Text(0, 0, levelFont, ("Game Level: " + levelCount), this.getVertexBufferObjectManager());
-
-
-
-
 
 
         //BACKGROUND
@@ -213,15 +214,21 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         textureRedDisk.load();
         //textureBlueDisk.load();
 
-        spriteRedDisk0 = new Sprite(300, 400, 230, 65, regionRedDisk, getVertexBufferObjectManager());
-        spriteRedDisk1 = new Sprite(300, 600, 230, 65, regionRedDisk, getVertexBufferObjectManager());
-        spriteRedDisk2 = new Sprite(300, 800, 230, 65, regionRedDisk, getVertexBufferObjectManager());
+
+        //playerShot = new Rectangle(60, 60, 60, 60, getVertexBufferObjectManager());
+
+        spriteRedDisk0 = new Sprite(0, CAMERA_HEIGHT/2, 230, 65, regionRedDisk, getVertexBufferObjectManager());
 
 
-        diskArrayList.add(spriteRedDisk0);
-        diskArrayList.add(spriteRedDisk1);
-        diskArrayList.add(spriteRedDisk2);
+        //spriteRedDisk1 = new Sprite(300, 600, 230, 65, regionRedDisk, getVertexBufferObjectManager());
+        //spriteRedDisk2 = new Sprite(300, 800, 230, 65, regionRedDisk, getVertexBufferObjectManager());
 
+
+        //diskArrayList.add(spriteRedDisk0);
+        //diskArrayList.add(spriteRedDisk1);
+        //diskArrayList.add(spriteRedDisk2);
+
+        //Random random = new Random();
 
 
 
@@ -236,37 +243,13 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
                 secondCount--;
                 startTimerText.setText(Integer.toString(secondCount));
 
-                if (secondCount == 1) {
-                    startGame();
-                }
 
                 if (secondCount <=0){
                     m_Scene.unregisterUpdateHandler(countDownTimerHandler);
                     m_Scene.detachChild(startTimerText);
+                    startGame();
                     //startGame
 
-                }
-            }
-        });
-
-        releaseDiskTimerHandler = new TimerHandler(releaseDiskTimeRate, true,new ITimerCallback() {
-
-            int diskCount = 3;
-
-            @Override
-            public void onTimePassed(final TimerHandler pTimerHandler) {
-
-                m_Scene.attachChild(diskArrayList.get(diskCount-1));
-                Log.d("bro", "newShot");
-                diskCount--;
-
-
-
-                if (diskCount <=0){
-                    Log.d("bro", "TIMEROVER");
-                    m_Scene.unregisterUpdateHandler(releaseDiskTimerHandler);
-
-                    //startGame
                 }
             }
         });
@@ -283,18 +266,50 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         m_Scene.setOnSceneTouchListener(this);
 
         //PHYSICS WORLD
-        mPhysicsWorld = new PhysicsWorld(new Vector2(0, SensorManager.GRAVITY_EARTH), false);
-        final VertexBufferObjectManager vertexBufferObjectManager = this.getVertexBufferObjectManager();
-        final Rectangle ground = new Rectangle(0, CAMERA_HEIGHT - 2, CAMERA_WIDTH, 2, vertexBufferObjectManager);
-        final Rectangle roof = new Rectangle(0, 0, CAMERA_WIDTH, 2, vertexBufferObjectManager);
-        final Rectangle left = new Rectangle(0, 0, 2, CAMERA_HEIGHT, vertexBufferObjectManager);
-        final Rectangle right = new Rectangle(CAMERA_WIDTH - 2, 0, 2, CAMERA_HEIGHT, vertexBufferObjectManager);
+        mPhysicsWorld = new PhysicsWorld(new Vector2(0, SensorManager.GRAVITY_EARTH), false){
+            @Override
+            public void onUpdate(float pSecondsElapsed){
+                super.onUpdate(pSecondsElapsed);
 
+                if (spriteRedDisk0.getX() > CAMERA_WIDTH){
+                    createDisk();
+                    shootDisk();
+                }
+                if (didDiskFall){
+                    createDisk();
+                    shootDisk();
+                    didDiskFall = false;
+                }
+            }
+        };
+        objectFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
+
+        final VertexBufferObjectManager vertexBufferObjectManager = this.getVertexBufferObjectManager();
         final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
-        PhysicsFactory.createBoxBody(mPhysicsWorld, ground, BodyDef.BodyType.StaticBody, wallFixtureDef);
-        PhysicsFactory.createBoxBody(mPhysicsWorld, roof, BodyDef.BodyType.StaticBody, wallFixtureDef);
-        PhysicsFactory.createBoxBody(mPhysicsWorld, left, BodyDef.BodyType.StaticBody, wallFixtureDef);
-        PhysicsFactory.createBoxBody(mPhysicsWorld, right, BodyDef.BodyType.StaticBody, wallFixtureDef);
+
+        ground = new Rectangle(0, CAMERA_HEIGHT - 2, CAMERA_WIDTH, 2, vertexBufferObjectManager);
+        bottomBody = PhysicsFactory.createBoxBody(mPhysicsWorld, ground, BodyDef.BodyType.StaticBody, wallFixtureDef);
+        bottomBody.setUserData("ground");
+        mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(ground, bottomBody, true, true));
+
+        final Rectangle roof = new Rectangle(0, 0, CAMERA_WIDTH, 2, vertexBufferObjectManager);
+        roofBody = PhysicsFactory.createBoxBody(mPhysicsWorld, roof, BodyDef.BodyType.StaticBody, wallFixtureDef);
+        roofBody.setUserData("roof");
+        mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(roof, roofBody, true, true));
+
+        final Rectangle left = new Rectangle(0, 0, 2, CAMERA_HEIGHT, vertexBufferObjectManager);
+        leftBody = PhysicsFactory.createBoxBody(mPhysicsWorld, left, BodyDef.BodyType.StaticBody, wallFixtureDef);
+        leftBody.setUserData("left");
+        mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(left, leftBody, true, true));
+
+        final Rectangle right = new Rectangle(CAMERA_WIDTH - 2, 0, 2, CAMERA_HEIGHT, vertexBufferObjectManager);
+        rightBody = PhysicsFactory.createBoxBody(mPhysicsWorld, right, BodyDef.BodyType.StaticBody, wallFixtureDef);
+        rightBody.setUserData("right");
+        mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(right, rightBody, true, true));
+
+
+
+        //m_Scene.attachChild(spriteRedDisk0);
 
 
         m_Scene.attachChild(ground);
@@ -307,14 +322,15 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         m_Scene.attachChild(spriteCrosshair);
 
 
-        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
-        sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mSensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI);
-        sensorHandler = new SensorHandler(this);
 
         m_Scene.attachChild(startTimerText);
         m_Scene.attachChild(gameLevelText);
         m_Scene.registerUpdateHandler(countDownTimerHandler);
+
+
+
+        mPhysicsWorld.setContactListener(createContactListener());
+        m_Scene.registerUpdateHandler(mPhysicsWorld);
 
         return m_Scene;
 
@@ -327,50 +343,171 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
         switch (myEventAction){
             case MotionEvent.ACTION_DOWN:
+
                 spriteCrosshair.registerEntityModifier(new ScaleModifier(1.45f, 1, 0));
-                //spriteCrosshair.setScale(spriteCrosshair.getScaleX()/1.05f, spriteCrosshair.getScaleY()/1.05f);
+
                 break;
             case MotionEvent.ACTION_MOVE:
 
                 break;
             case MotionEvent.ACTION_UP:
 
-
+                spriteCrosshair.clearEntityModifiers();
                 //THIS MADE MY LIFE VERY EASY
                 if (spriteGun.isAnimationRunning()){
                     break;
                 }
                 else{
-                    final Rectangle playerShot = new Rectangle(spriteCrosshair.getX() + (spriteCrosshair.getWidth()/2),
+                    spriteCrosshair.setScale(1.0f, 1.0f);
+                    spriteGun.animate(100, false);
+
+
+                    playerShot = new Rectangle(spriteCrosshair.getX() + (spriteCrosshair.getWidth()/2),
                             spriteCrosshair.getY() + (spriteCrosshair.getHeight() / 2),
                             60, 60, getVertexBufferObjectManager());
-                    playerShot.setVisible(false);
+
+
+                    bulletBody = PhysicsFactory.createBoxBody(mPhysicsWorld, playerShot, BodyDef.BodyType.StaticBody, objectFixtureDef);
+                    bulletBody.setUserData("bullet");
+                    mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(playerShot, bulletBody, true, true));
+
+                    //playerShot.setVisible(false);
+
                     pScene.attachChild(playerShot);
+
                     try {
-                        isCollides(spriteRedDisk0, playerShot);
-                        isCollides(spriteRedDisk1, playerShot);
-                        isCollides(spriteRedDisk2, playerShot);
-                        pScene.detachChild(playerShot);
+                        checkShot(spriteRedDisk0, playerShot);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
-                    spriteGun.animate(100, false);
-                    spriteCrosshair.clearEntityModifiers();
-                    spriteCrosshair.setScale(1.0f, 1.0f);
                     break;
                 }
         }
-
         return false;
     }
 
     public void startGame(){
-        m_Scene.registerUpdateHandler(releaseDiskTimerHandler);
+
+
+        diskFireRate = 10;
+
+
+        createDisk();
+        shootDisk();
+
 
     }
 
-    public boolean isCollides(Sprite diskSprite ,Rectangle playerShot) throws Exception{
+    public void createDisk(){
+
+        final FixtureDef diskFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
+        spriteRedDisk0 = new Sprite(0, CAMERA_HEIGHT/2, 230, 65, regionRedDisk, getVertexBufferObjectManager());
+        diskBody = PhysicsFactory.createBoxBody(mPhysicsWorld, spriteRedDisk0, BodyDef.BodyType.KinematicBody, diskFixtureDef);
+        diskBody.setUserData("disk");
+        mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(spriteRedDisk0, diskBody, true, true));
+
+
+
+
+
+    }
+
+    public void shootDisk(){
+
+        diskCount++;
+
+        if (diskCount <= 3){
+            m_Scene.attachChild(spriteRedDisk0);
+            diskBody.setLinearVelocity(diskFireRate, 0);
+        }
+        else {
+
+            if (hitCount == 3){
+                levelCount++;
+                gameLevelText.setText("Game Level: " + levelCount);
+                diskFireRate = diskFireRate + 5;
+                hitCount = 0;
+                diskCount = 0;
+                shootDisk();
+            }
+            else{
+                gameLevelText.setText("Gameover");
+            }
+
+        }
+
+
+
+
+
+
+    }
+
+
+    private ContactListener createContactListener(){
+
+        ContactListener contactListener = new ContactListener() {
+
+            @Override
+            public void beginContact(Contact contact) {
+
+                final Fixture x1 = contact.getFixtureA();
+                final Fixture x2 = contact.getFixtureB();
+
+                if (x2.getBody().getUserData().equals("ground")&&x1.getBody().getUserData().equals("disk"))
+                {
+                    mPhysicsWorld.unregisterPhysicsConnector(mPhysicsWorld.getPhysicsConnectorManager().findPhysicsConnectorByShape(spriteRedDisk0));
+                    diskBody.setActive(false);
+
+                    mPhysicsWorld.destroyBody(diskBody);
+
+                    spriteRedDisk0.detachSelf();
+
+                    didDiskFall = true;
+
+
+
+
+                }
+                else if (x2.getBody().getUserData().equals("disk")&&x1.getBody().getUserData().equals("ground")){
+
+                    mPhysicsWorld.unregisterPhysicsConnector(mPhysicsWorld.getPhysicsConnectorManager().findPhysicsConnectorByShape(spriteRedDisk0));
+                    diskBody.setActive(false);
+
+                    mPhysicsWorld.destroyBody(diskBody);
+
+                    spriteRedDisk0.detachSelf();
+
+                    didDiskFall = true;
+
+
+
+                }
+            }
+
+            @Override
+            public void endContact(Contact contact) {
+
+            }
+
+            @Override
+            public void preSolve(Contact contact, Manifold oldManifold) {
+
+            }
+
+            @Override
+            public void postSolve(Contact contact, ContactImpulse impulse) {
+
+            }
+
+        };
+
+        return contactListener;
+    }
+
+
+    public boolean checkShot(Sprite diskSprite , Rectangle playerShot) throws Exception{
 
 
         float diffX = Math.abs( (diskSprite.getX() +  diskSprite.getWidth()/2 )-
@@ -378,53 +515,63 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         float diffY = Math.abs( (diskSprite.getY() +  diskSprite.getHeight()/2 )-
                 (playerShot.getY() + playerShot.getHeight()/2 ));
 
-        if(diffX < (diskSprite.getWidth()/2 + playerShot.getWidth()/3)
-                && diffY < (diskSprite.getHeight()/2 + playerShot.getHeight()/3)){
-
-            m_Scene.detachChild(diskSprite);
-            hitCount++;
+        if(diffX < (diskSprite.getWidth()/2 + playerShot.getWidth()/3) && diffY < (diskSprite.getHeight()/2 + playerShot.getHeight()/3)){
             Log.d("HIT", "HIT");
+            hitCount++;
+            mPhysicsWorld.unregisterPhysicsConnector(mPhysicsWorld.getPhysicsConnectorManager().findPhysicsConnectorByShape(playerShot));
+            bulletBody.setActive(false);
+            mPhysicsWorld.destroyBody(bulletBody);
+            playerShot.detachSelf();
+
+
+            diskBody.setAngularVelocity(10);
+            diskBody.setLinearVelocity(0, 20);
+
+            diskBody.setType(BodyDef.BodyType.DynamicBody);
+
+
             return true;
-        }else
+        }else {
+
             Log.d("Miss", "Miss");
+            mPhysicsWorld.unregisterPhysicsConnector(mPhysicsWorld.getPhysicsConnectorManager().findPhysicsConnectorByShape(playerShot));
+            bulletBody.setActive(false);
+            mPhysicsWorld.destroyBody(bulletBody);
+            playerShot.detachSelf();
             return false;
+        }
     }
 
-
-    public void initListeners(){
-
-        mSensorManager.registerListener(this,
-                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                SensorManager.SENSOR_DELAY_FASTEST);
-
-        mSensorManager.registerListener(this,
-                mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
-                SensorManager.SENSOR_DELAY_FASTEST);
-
-        mSensorManager.registerListener(this,
-                mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
-                SensorManager.SENSOR_DELAY_FASTEST);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-
-        //MUST PUT ALL THIS MATH IN THE SENSOR HANDLER
-        //ROOKIE FUCKING CODE
-        spriteCrosshair.setPosition((float)-sensorHandler.xPos * 43 + (CAMERA_WIDTH/2 -(textureCrosshair.getWidth()/2)),
-                (float)(sensorHandler.yPos * 43 + (CAMERA_HEIGHT/2) - Constants_Display.difference));
-
-        spriteGun.setX((float)-sensorHandler.xPos * 20 + ((CAMERA_WIDTH/2) - (gunWidth.intValue()/2)));
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
 
     @Override
     protected synchronized void onResume() {
         system_ui_manager.hideView();
+        this.enableAccelerationSensor(this);
         super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mEngine.stop();
+        this.disableAccelerationSensor();
+    }
+
+    @Override
+    public void onAccelerationAccuracyChanged(AccelerationData pAccelerationData) {
+
+    }
+
+    @Override
+    public void onAccelerationChanged(AccelerationData pAccelerationData) {
+
+        final Vector2 gravity = Vector2Pool.obtain(pAccelerationData.getX(), pAccelerationData.getY());
+        this.mPhysicsWorld.setGravity(gravity);
+        Vector2Pool.recycle(gravity);
+        spriteCrosshair.setPosition((float)-SensorHandler.xPos * 43 + (CAMERA_WIDTH/2 -(textureCrosshair.getWidth()/2)),
+                (float)(SensorHandler.yPos * 43 + (CAMERA_HEIGHT/2) - Constants_Display.difference));
+
+        //spriteGun.setX((float)-SensorHandler.xPos * 20);
+        spriteGun.setX((float)-SensorHandler.xPos * 22  + ((CAMERA_WIDTH/2) - (textureGun.getWidth()/2)));
     }
 }

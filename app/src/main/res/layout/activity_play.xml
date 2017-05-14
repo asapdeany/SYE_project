@@ -12,4 +12,5 @@
         android:name="com.example.deansponholz.sye_project.Fragment_Play"
         android:id="@+id/fragment_play"
         tools:layout="@layout/fragment_play" />
+
 </LinearLayout>

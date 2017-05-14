@@ -1,5 +1,6 @@
 package com.example.deansponholz.sye_project;
 
+import android.graphics.Color;
 import android.hardware.SensorManager;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -64,7 +65,6 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
     //Physics
     protected PhysicsWorld mPhysicsWorld;
     FixtureDef objectFixtureDef;
-    Rectangle ground;
 
     //Background
     private TextureRegion regionBackground;
@@ -79,7 +79,7 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
     //PlayerShot
     private Rectangle playerShot;
-    private boolean isBulletThere = false;
+
 
     //Crosshair
     private Double crosshairHeight, crosshairWidth;
@@ -111,12 +111,13 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
 
     //HUD
-    private Text startTimerText, gameLevelText;
-    private BitmapTextureAtlas startTimerFontTexture, gameLevelFontTexture;
-    private Font countdownFont, levelFont;
+    private Text startTimerText, gameLevelText, currentScoreText;
+    private BitmapTextureAtlas startTimerFontTexture, gameLevelFontTexture, currentScoreFontTexture;
+    private Font countdownFont, levelFont, currentScoreFont;
     private int levelCount = 1;
     private int hitCount = 0;
     private int diskCount = 0;
+    private int currentScore = 0;
     //This represents the sprite sheet(image) rows and columns
     //We have 3 Rows and 3 Columns
     private static int   SPR_COLUMN  = 3;
@@ -171,11 +172,16 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         gameLevelFontTexture.load();
         levelFont.load();
 
+        currentScoreFontTexture = new BitmapTextureAtlas(this.getTextureManager(), 2048, 2048);
+        currentScoreFont = FontFactory.createFromAsset(this.getFontManager(), currentScoreFontTexture, this.getAssets(), "Droid.ttf", 100, true, Color.RED);
+        currentScoreFontTexture.load();
+        currentScoreFont.load();
+
 
         startTimerText = new Text(CAMERA_WIDTH/2, CAMERA_HEIGHT/2, countdownFont, "3", this.getVertexBufferObjectManager());
         startTimerText.setPosition((CAMERA_WIDTH/2) - startTimerText.getWidth()/2, (CAMERA_HEIGHT/2) - startTimerText.getHeight()/2);
-
         gameLevelText = new Text(0, 0, levelFont, ("Game Level: " + levelCount), this.getVertexBufferObjectManager());
+        currentScoreText = new Text((float) (CAMERA_WIDTH * 0.65), 0,currentScoreFont, ("Current Score: " + currentScore), this.getVertexBufferObjectManager());
 
 
         //BACKGROUND
@@ -287,7 +293,7 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         final VertexBufferObjectManager vertexBufferObjectManager = this.getVertexBufferObjectManager();
         final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
 
-        ground = new Rectangle(0, CAMERA_HEIGHT - 2, CAMERA_WIDTH, 2, vertexBufferObjectManager);
+        final Rectangle ground = new Rectangle(0, CAMERA_HEIGHT - 2, CAMERA_WIDTH, 2, vertexBufferObjectManager);
         bottomBody = PhysicsFactory.createBoxBody(mPhysicsWorld, ground, BodyDef.BodyType.StaticBody, wallFixtureDef);
         bottomBody.setUserData("ground");
         mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(ground, bottomBody, true, true));
@@ -325,6 +331,7 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
         m_Scene.attachChild(startTimerText);
         m_Scene.attachChild(gameLevelText);
+        m_Scene.attachChild(currentScoreText);
         m_Scene.registerUpdateHandler(countDownTimerHandler);
 
 
@@ -436,12 +443,6 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
             }
 
         }
-
-
-
-
-
-
     }
 
 

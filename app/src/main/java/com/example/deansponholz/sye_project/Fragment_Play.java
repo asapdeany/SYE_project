@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -82,6 +83,7 @@ public class Fragment_Play extends Fragment {
     System_UI_Manager system_ui_manager;
 
     RelativeLayout fragment_play;
+    RelativeLayout surfaceViewAndEngine;
     Integer radiusValue;
     Button button_shoot;
 
@@ -107,7 +109,6 @@ public class Fragment_Play extends Fragment {
         fragment_play.addView(practiceDrawView);
 
 
-
         loadBitmaps();
         testGun0 = (ImageView) root.findViewById(R.id.iv_gun);
         testGun0.setImageBitmap(bitmap0);
@@ -125,6 +126,8 @@ public class Fragment_Play extends Fragment {
                     radiusValue = radiusValue - 2;
             }
         }));
+
+
         return root;
     }
 

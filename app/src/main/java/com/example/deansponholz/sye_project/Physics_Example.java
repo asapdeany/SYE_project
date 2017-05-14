@@ -27,6 +27,9 @@ import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegion
 import org.andengine.opengl.texture.region.ITiledTextureRegion;
 import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
+import org.andengine.opengl.view.RenderSurfaceView;
+import org.andengine.ui.IGameInterface;
+import org.andengine.ui.activity.LayoutGameActivity;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.Constants;
 import org.andengine.util.color.Color;
@@ -34,7 +37,10 @@ import org.andengine.util.debug.Debug;
 import org.andengine.util.math.MathUtils;
 
 import android.hardware.SensorManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.badlogic.gdx.math.Vector2;
@@ -46,7 +52,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
  * Created by deansponholz on 4/2/17.
  */
 
-public class Physics_Example extends SimpleBaseGameActivity implements IAccelerationListener, IOnSceneTouchListener {
+public class Physics_Example extends LayoutGameActivity implements IAccelerationListener, IOnSceneTouchListener {
     // ===========================================================
     // Constants https://github.com/m5/andengine-pixel-perfect
     // ===========================================================
@@ -91,10 +97,20 @@ public class Physics_Example extends SimpleBaseGameActivity implements IAccelera
         final Camera camera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 
         return new EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), camera);
+
     }
 
     @Override
-    public void onCreateResources() {
+    protected void onSetContentView() {
+        super.setContentView(this.getLayoutID());
+
+        this.mRenderSurfaceView = (RenderSurfaceView) this.findViewById(this.getRenderSurfaceViewID());
+
+        this.mRenderSurfaceView.setRenderer(this.mEngine, this);
+    }
+
+    @Override
+    public void onCreateResources(OnCreateResourcesCallback pOnCreateResourcesCallback) throws Exception {
         BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
 
         this.mBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 64, 64, TextureOptions.BILINEAR);
@@ -114,12 +130,12 @@ public class Physics_Example extends SimpleBaseGameActivity implements IAccelera
     }
 
     @Override
-    public Scene onCreateScene() {
-
+    public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback) throws Exception {
         this.mEngine.registerUpdateHandler(new FPSLogger());
 
 
         this.mScene = new Scene();
+
 
         final int centerX = (int) (CAMERA_WIDTH - mBgTexture.getWidth()) / 2;
         final int centerY = (int) (CAMERA_HEIGHT - mBgTexture.getHeight()) / 2;
@@ -129,6 +145,8 @@ public class Physics_Example extends SimpleBaseGameActivity implements IAccelera
         this.mScene.setOnSceneTouchListener(this);
 
         this.mPhysicsWorld = new PhysicsWorld(new Vector2(0, SensorManager.GRAVITY_EARTH), false);
+
+
 
         final VertexBufferObjectManager vertexBufferObjectManager = this.getVertexBufferObjectManager();
         final Rectangle ground = new Rectangle(0, CAMERA_HEIGHT - 2, CAMERA_WIDTH, 2, vertexBufferObjectManager);
@@ -149,8 +167,14 @@ public class Physics_Example extends SimpleBaseGameActivity implements IAccelera
 
         this.mScene.registerUpdateHandler(this.mPhysicsWorld);
 
-        return this.mScene;
     }
+
+    @Override
+    public void onPopulateScene(Scene pScene, OnPopulateSceneCallback pOnPopulateSceneCallback) throws Exception {
+
+    }
+
+
 
     @Override
     public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent pSceneTouchEvent) {
@@ -221,6 +245,17 @@ public class Physics_Example extends SimpleBaseGameActivity implements IAccelera
 
         this.mScene.attachChild(face);
         this.mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(face, body, true, true));
+    }
+
+    @Override
+    protected int getLayoutID() {
+        return R.layout.fragment_play;
+    }
+
+    @Override
+    protected int getRenderSurfaceViewID() {
+        return R.id.xml_rendersurfaceview;
+
     }
 
     // ===========================================================

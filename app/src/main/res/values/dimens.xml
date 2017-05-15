@@ -3,4 +3,8 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="menu_button_size">150dp</dimen>
+    <dimen name="button_margin">36dp</dimen>
+    <dimen name="button_margin_start">40dp</dimen>
+    <dimen name="button_text_size">18sp</dimen>
+    <dimen name="text_size_play">30sp</dimen>
 </resources>

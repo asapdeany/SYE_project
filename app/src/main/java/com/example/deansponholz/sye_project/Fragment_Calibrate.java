@@ -21,6 +21,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import java.util.Random;
+
 /**
  * Created by deansponholz on 1/24/17.
  */
@@ -37,6 +39,8 @@ public class Fragment_Calibrate extends Fragment {
     System_UI_Manager system_ui_manager;
 
     RelativeLayout fragment_calibrate;
+    private static final int LINE_SPACING = 100;
+    Random rand = new Random();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -82,7 +86,9 @@ public class Fragment_Calibrate extends Fragment {
 
         //onDraw
         Canvas canvas;
+        float fishX, fishY;
         Paint paintCircle = new Paint();
+        Paint paintLine = new Paint();
 
 
         public CalibrateDrawView(Context context) {
@@ -95,18 +101,31 @@ public class Fragment_Calibrate extends Fragment {
             canvas = new Canvas();
             paintCircle = new Paint();
             paintCircle.setColor(Color.BLACK);
-            paintCircle.setStrokeWidth(4);
+            paintCircle.setStrokeWidth(7);
             paintCircle.setStyle(Paint.Style.STROKE);
+
+            paintLine = new Paint();
+            paintLine.setColor(Color.RED);
+            paintLine.setStrokeWidth(3.25f);
+            paintLine.setStyle(Paint.Style.STROKE);
+
         }
 
         @Override
         public void onDraw(Canvas canvas) {
+
+
+            int yOffset = (Constants_Display.height / 2) - 60;
+            int xOffset = (Constants_Display.width / 2) - 55;
+
             canvas.drawCircle(constants_display.width / 2, constants_display.height / 2, 10, paintCircle);
 
             canvas.drawCircle((float)(-sensorHandler.xPos*43 + (constants_display.width)/2),
                     (float) (sensorHandler.yPos*38 + ((constants_display.height)/2) - Constants_Display.difference),
                     80, paintCircle);
-            /*
+
+
+
             fishX = (float) (-sensorHandler.xPos * 5) + xOffset;
             fishY = (float) (sensorHandler.yPos * 5) + yOffset;
 
@@ -114,29 +133,27 @@ public class Fragment_Calibrate extends Fragment {
 
 
             //Loop through to create 10 vertical lines
-            for (int i = 1; i < 15; i++) {
-                canvas.drawLine(fishX + (i * LINE_SPACING), -height, fishX + (i * LINE_SPACING), +height, paint);
+            for (int i = 1; i < 17; i++) {
+                canvas.drawLine(fishX + (i * LINE_SPACING), -Constants_Display.height, fishX + (i * LINE_SPACING), +Constants_Display.height, paintLine);
 
             }
-            for (int i = 1; i < 15; i++) {
-                canvas.drawLine(fishX + (i * -LINE_SPACING), -height, fishX + (i * -LINE_SPACING), +height, paint);
+            for (int i = 1; i < 17; i++) {
+                canvas.drawLine(fishX + (i * -LINE_SPACING), -Constants_Display.height, fishX + (i * -LINE_SPACING), +Constants_Display.height, paintLine);
 
             }
 
             //Loop through to create 10 horizontal lines
-            for (int i = 1; i < 15; i++) {
-                canvas.drawLine(0, fishY + (i * LINE_SPACING), width, fishY + (i * LINE_SPACING), paint);
+            for (int i = 1; i < 17; i++) {
+                canvas.drawLine(0, fishY + (i * LINE_SPACING), Constants_Display.width, fishY + (i * LINE_SPACING), paintLine);
 
             }
-            for (int i = 1; i < 15; i++) {
-                canvas.drawLine(0, fishY - (i * LINE_SPACING), width, fishY - (i * LINE_SPACING), paint);
+            for (int i = 1; i < 17; i++) {
+                canvas.drawLine(0, fishY - (i * LINE_SPACING), Constants_Display.width, fishY - (i * LINE_SPACING), paintLine);
             }
             //middle vertical line from landscape point of view
-            canvas.drawLine(fishX, -height, fishX, height, paint);
+            canvas.drawLine(fishX, -Constants_Display.height, fishX, Constants_Display.height, paintLine);
             //middle horizontal line from landscape point of view
-            canvas.drawLine(0, fishY, width, fishY, paint);
-            */
-
+            canvas.drawLine(0, fishY, Constants_Display.width, fishY, paintLine);
             invalidate();
         }
 

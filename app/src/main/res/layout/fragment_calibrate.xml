@@ -9,11 +9,12 @@
         android:id="@+id/button_calibrate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="36dp"
-        android:background="@drawable/button_menu"
-        android:text="Calibrate"
+        android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_alignParentStart="true" />
+        android:layout_marginStart="@dimen/button_margin"
+        android:background="@drawable/button_menu"
+        android:text="@string/calibrate"
+        android:textSize="@dimen/button_text_size" />
 
     <Button
         android:id="@+id/button_start"
@@ -22,8 +23,9 @@
         android:layout_alignBaseline="@+id/button_calibrate"
         android:layout_alignBottom="@+id/button_calibrate"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="40dp"
+        android:layout_marginEnd="@dimen/button_margin_start"
         android:background="@drawable/button_menu"
-        android:text="Start" />
+        android:text="@string/start"
+        android:textSize="@dimen/button_text_size" />
 
 </RelativeLayout>

@@ -22,6 +22,8 @@ import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.WakeLockOptions;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.entity.modifier.MoveModifier;
 import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.primitive.Rectangle;
@@ -47,8 +49,9 @@ import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
+import org.andengine.util.modifier.IModifier;
 
-import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by deansponholz on 4/29/17.
@@ -57,14 +60,49 @@ import java.util.ArrayList;
 public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouchListener, IAccelerationListener{
 
     //Instance Data
+
+    //Scene metrics
     public static final int CAMERA_WIDTH = Constants_Display.width;
     public static final int CAMERA_HEIGHT = Constants_Display.height;
-    System_UI_Manager system_ui_manager;
     private Scene m_Scene;
+    private System_UI_Manager system_ui_manager;
+
+    //HUD
+    private Text startTimerText, gameLevelText, currentScoreText;
+    private BitmapTextureAtlas startTimerFontTexture, gameLevelFontTexture, currentScoreFontTexture;
+    private Font countdownFont, levelFont, currentScoreFont;
+    private int levelCount = 1;
+    private int hitCount = 0;
+    private int diskCount = 0;
+    //This represents the sprite sheet(image) rows and columns
+    //We have 3 Rows and 3 Columns
+    private static int   SPR_COLUMN  = 3;
+    private static int   SPR_ROWS  = 3;
+    private MoveModifier moveModifierPlayAgainForward, moveModifierPlayAgainBackward;
+
+    //TIMERS
+    private TimerHandler countDownTimerHandler, nextLevelTimerHandler;
+    private int secondCount = 3;
 
     //Physics
     protected PhysicsWorld mPhysicsWorld;
-    FixtureDef objectFixtureDef;
+    private FixtureDef objectFixtureDef, wallFixtureDef;
+    private Rectangle ground, roof, left, right;
+    private Body diskBody, roofBody, bottomBody, leftBody, rightBody, bulletBody;
+
+    //DISKS
+    private BitmapTextureAtlas textureRedDisk;
+    private TextureRegion regionRedDisk;
+    private Sprite spriteRedDisk0;
+    private float diskFireRateX, diskFireRateY;
+    /*
+    private BitmapTextureAtlas textureBlueDisk;
+    private TextureRegion regionBlueDisk;
+    private Sprite spriteBlueDisk0, spriteBlueDisk1, spriteBlueDisk2;
+    */
+
+    //PlayerShot
+    private Rectangle playerShot;
 
     //Background
     private TextureRegion regionBackground;
@@ -77,55 +115,22 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
     private TiledTextureRegion regionGun;
     private AnimatedSprite spriteGun;
 
-    //PlayerShot
-    private Rectangle playerShot;
-
-
     //Crosshair
-    private Double crosshairHeight, crosshairWidth;
     private BitmapTextureAtlas textureCrosshair;
     private TextureRegion regionCrosshair;
     private Sprite spriteCrosshair;
-    private boolean isSpriteShrinking;
 
+    //Booleans
+    private boolean didDiskFall = false;
+    private boolean isDiskHalfway = false;
+    private boolean isSpriteShrunk = false;
+    private boolean gameOver = false;
 
-    //DISKS
-    private BitmapTextureAtlas textureRedDisk;
-    private TextureRegion regionRedDisk;
-    private Sprite spriteRedDisk0, spriteRedDisk1, spriteRedDisk2;
-    private float diskFireRate;
+    //Random
+    private Random random = new Random();
+    int lowSpawn = 320;
+    int highSpawn = 750;
 
-    /*
-    private BitmapTextureAtlas textureBlueDisk;
-    private TextureRegion regionBlueDisk;
-    private Sprite spriteBlueDisk0, spriteBlueDisk1, spriteBlueDisk2;
-    */
-
-    ArrayList<Sprite> diskArrayList = new ArrayList<Sprite>();
-    MoveModifier modifierDiskMovement0, modifierDiskMovement1, modifierDiskMovement2;
-
-    //TIMERS
-    private TimerHandler countDownTimerHandler;
-    private TimerHandler releaseDiskTimerHandler;
-    private TimerHandler bulletHideTimerHandler;
-
-
-    //HUD
-    private Text startTimerText, gameLevelText, currentScoreText;
-    private BitmapTextureAtlas startTimerFontTexture, gameLevelFontTexture, currentScoreFontTexture;
-    private Font countdownFont, levelFont, currentScoreFont;
-    private int levelCount = 1;
-    private int hitCount = 0;
-    private int diskCount = 0;
-    private int currentScore = 0;
-    //This represents the sprite sheet(image) rows and columns
-    //We have 3 Rows and 3 Columns
-    private static int   SPR_COLUMN  = 3;
-    private static int   SPR_ROWS  = 3;
-
-    boolean didDiskFall = false;
-
-    Body diskBody, roofBody, bottomBody, leftBody, rightBody, bulletBody;
 
     @Override
     public EngineOptions onCreateEngineOptions() {
@@ -156,7 +161,7 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         FontFactory.setAssetBasePath("font/");
 
         //HUD
-        startTimerFontTexture = new BitmapTextureAtlas(this.getTextureManager(), 512, 512, TextureOptions.BILINEAR);
+        startTimerFontTexture = new BitmapTextureAtlas(this.getTextureManager(), 2048, 2048, TextureOptions.BILINEAR);
         countdownFont = FontFactory.createFromAsset(this.getFontManager(),
                 startTimerFontTexture, this.getAssets(),
                 "Droid.ttf", 200, true,
@@ -178,10 +183,10 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         currentScoreFont.load();
 
 
-        startTimerText = new Text(CAMERA_WIDTH/2, CAMERA_HEIGHT/2, countdownFont, "3", this.getVertexBufferObjectManager());
+        startTimerText = new Text(CAMERA_WIDTH/2, CAMERA_HEIGHT/2, countdownFont, "currentScore: 12341", this.getVertexBufferObjectManager());
         startTimerText.setPosition((CAMERA_WIDTH/2) - startTimerText.getWidth()/2, (CAMERA_HEIGHT/2) - startTimerText.getHeight()/2);
         gameLevelText = new Text(0, 0, levelFont, ("Game Level: " + levelCount), this.getVertexBufferObjectManager());
-        currentScoreText = new Text((float) (CAMERA_WIDTH * 0.65), 0,currentScoreFont, ("Current Score: " + currentScore), this.getVertexBufferObjectManager());
+        currentScoreText = new Text((float) (CAMERA_WIDTH * 0.65), 0,currentScoreFont, ("Current Score: " + hitCount), this.getVertexBufferObjectManager());
 
 
         //BACKGROUND
@@ -205,12 +210,12 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
                 regionGun,
                 getVertexBufferObjectManager());
 
+
         //CROSSHAIR
         textureCrosshair = new BitmapTextureAtlas(getTextureManager(), 225, 225);
         regionCrosshair = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.textureCrosshair, this, "crosshair.png", 0, 0);
         textureCrosshair.load();
         spriteCrosshair = new Sprite(CAMERA_WIDTH/2 - (textureCrosshair.getWidth()/2), CAMERA_HEIGHT/2, regionCrosshair, getVertexBufferObjectManager());
-        //spriteCrosshair = new Sprite(CAMERA_WIDTH/2, CAMERA_HEIGHT/2,
 
         //DISKS
         textureRedDisk = new BitmapTextureAtlas(getTextureManager(), 102, 28);
@@ -221,27 +226,13 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         //textureBlueDisk.load();
 
 
-        //playerShot = new Rectangle(60, 60, 60, 60, getVertexBufferObjectManager());
-
         spriteRedDisk0 = new Sprite(0, CAMERA_HEIGHT/2, 230, 65, regionRedDisk, getVertexBufferObjectManager());
-
-
-        //spriteRedDisk1 = new Sprite(300, 600, 230, 65, regionRedDisk, getVertexBufferObjectManager());
-        //spriteRedDisk2 = new Sprite(300, 800, 230, 65, regionRedDisk, getVertexBufferObjectManager());
-
-
-        //diskArrayList.add(spriteRedDisk0);
-        //diskArrayList.add(spriteRedDisk1);
-        //diskArrayList.add(spriteRedDisk2);
-
-        //Random random = new Random();
 
 
 
         //Timers
         countDownTimerHandler = new TimerHandler(1, true,new ITimerCallback() {
 
-            int secondCount = 3;
 
             @Override
             public void onTimePassed(final TimerHandler pTimerHandler) {
@@ -253,6 +244,9 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
                 if (secondCount <=0){
                     m_Scene.unregisterUpdateHandler(countDownTimerHandler);
                     m_Scene.detachChild(startTimerText);
+                    secondCount = 3;
+                    startTimerText.setText(Integer.toString(secondCount));
+                    currentScoreText.setText("Current Score: 0");
                     startGame();
                     //startGame
 
@@ -260,6 +254,25 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
             }
         });
 
+
+        nextLevelTimerHandler = new TimerHandler(1, true, new ITimerCallback() {
+
+            int secondCount = 2;
+
+
+            @Override
+            public void onTimePassed(TimerHandler pTimerHandler) {
+
+                secondCount--;
+
+                if (secondCount <=0){
+                    currentScoreText.setText("Current Score: 0");
+                    m_Scene.unregisterUpdateHandler(nextLevelTimerHandler);
+                    m_Scene.detachChild(startTimerText);
+                    shootDisk();
+                }
+            }
+        });
 
     }
 
@@ -270,52 +283,58 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         m_Scene = new Scene();
         m_Scene.setBackground(spriteBackground);
         m_Scene.setOnSceneTouchListener(this);
+        final VertexBufferObjectManager vertexBufferObjectManager = this.getVertexBufferObjectManager();
 
-        //PHYSICS WORLD
+        //PHYSICS WORLD - uses UpdateListener
         mPhysicsWorld = new PhysicsWorld(new Vector2(0, SensorManager.GRAVITY_EARTH), false){
             @Override
             public void onUpdate(float pSecondsElapsed){
                 super.onUpdate(pSecondsElapsed);
 
+                if (!isDiskHalfway){
+                    if (spriteRedDisk0.getX() > (CAMERA_WIDTH * 0.425)){
+                        diskBody.setLinearVelocity(diskFireRateX, diskFireRateY);
+                        isDiskHalfway = true;
+                    }
+                }
+
                 if (spriteRedDisk0.getX() > CAMERA_WIDTH){
                     createDisk();
                     shootDisk();
+                    isDiskHalfway = false;
                 }
                 if (didDiskFall){
                     createDisk();
                     shootDisk();
                     didDiskFall = false;
+                    isDiskHalfway = false;
                 }
             }
         };
+
+
         objectFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
+        wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
 
-        final VertexBufferObjectManager vertexBufferObjectManager = this.getVertexBufferObjectManager();
-        final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
-
-        final Rectangle ground = new Rectangle(0, CAMERA_HEIGHT - 2, CAMERA_WIDTH, 2, vertexBufferObjectManager);
+        ground = new Rectangle(0, CAMERA_HEIGHT - 2, CAMERA_WIDTH, 2, vertexBufferObjectManager);
         bottomBody = PhysicsFactory.createBoxBody(mPhysicsWorld, ground, BodyDef.BodyType.StaticBody, wallFixtureDef);
         bottomBody.setUserData("ground");
         mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(ground, bottomBody, true, true));
 
-        final Rectangle roof = new Rectangle(0, 0, CAMERA_WIDTH, 2, vertexBufferObjectManager);
+        roof = new Rectangle(0, 0, CAMERA_WIDTH, 2, vertexBufferObjectManager);
         roofBody = PhysicsFactory.createBoxBody(mPhysicsWorld, roof, BodyDef.BodyType.StaticBody, wallFixtureDef);
         roofBody.setUserData("roof");
         mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(roof, roofBody, true, true));
 
-        final Rectangle left = new Rectangle(0, 0, 2, CAMERA_HEIGHT, vertexBufferObjectManager);
+        left = new Rectangle(0, 0, 2, CAMERA_HEIGHT, vertexBufferObjectManager);
         leftBody = PhysicsFactory.createBoxBody(mPhysicsWorld, left, BodyDef.BodyType.StaticBody, wallFixtureDef);
         leftBody.setUserData("left");
         mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(left, leftBody, true, true));
 
-        final Rectangle right = new Rectangle(CAMERA_WIDTH - 2, 0, 2, CAMERA_HEIGHT, vertexBufferObjectManager);
+        right = new Rectangle(CAMERA_WIDTH - 2, 0, 2, CAMERA_HEIGHT, vertexBufferObjectManager);
         rightBody = PhysicsFactory.createBoxBody(mPhysicsWorld, right, BodyDef.BodyType.StaticBody, wallFixtureDef);
         rightBody.setUserData("right");
         mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(right, rightBody, true, true));
-
-
-
-        //m_Scene.attachChild(spriteRedDisk0);
 
 
         m_Scene.attachChild(ground);
@@ -323,24 +342,20 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         m_Scene.attachChild(left);
         m_Scene.attachChild(right);
 
-
         m_Scene.attachChild(spriteGun);
         m_Scene.attachChild(spriteCrosshair);
 
-
-
+        startTimerText.setText("3");
+        startTimerText.setPosition((CAMERA_WIDTH/2) - startTimerText.getWidth()/2, (CAMERA_HEIGHT/2) - startTimerText.getHeight()/2);
         m_Scene.attachChild(startTimerText);
         m_Scene.attachChild(gameLevelText);
         m_Scene.attachChild(currentScoreText);
         m_Scene.registerUpdateHandler(countDownTimerHandler);
 
-
-
         mPhysicsWorld.setContactListener(createContactListener());
         m_Scene.registerUpdateHandler(mPhysicsWorld);
 
         return m_Scene;
-
     }
 
     @Override
@@ -359,11 +374,20 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
                 break;
             case MotionEvent.ACTION_UP:
 
+                if (spriteCrosshair.getScaleX() == 0.0){
+                    isSpriteShrunk = true;
+                }
+                else{
+                    isSpriteShrunk = false;
+                }
+
                 spriteCrosshair.clearEntityModifiers();
                 //THIS MADE MY LIFE VERY EASY
                 if (spriteGun.isAnimationRunning()){
                     break;
                 }
+
+
                 else{
                     spriteCrosshair.setScale(1.0f, 1.0f);
                     spriteGun.animate(100, false);
@@ -397,9 +421,13 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
     public void startGame(){
 
 
-        diskFireRate = 10;
+        diskFireRateX = 10;
+        diskFireRateY = 2;
+        levelCount = 1;
+        hitCount = 0;
+        diskCount = 0;
 
-
+        gameLevelText.setText("Game Level: " + levelCount);
         createDisk();
         shootDisk();
 
@@ -409,7 +437,10 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
     public void createDisk(){
 
         final FixtureDef diskFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
-        spriteRedDisk0 = new Sprite(0, CAMERA_HEIGHT/2, 230, 65, regionRedDisk, getVertexBufferObjectManager());
+        int randSpawn = random.nextInt(highSpawn - lowSpawn) + lowSpawn;
+        Log.d("randSpawn", Integer.toString(randSpawn));
+
+        spriteRedDisk0 = new Sprite(0, randSpawn, 230, 65, regionRedDisk, getVertexBufferObjectManager());
         diskBody = PhysicsFactory.createBoxBody(mPhysicsWorld, spriteRedDisk0, BodyDef.BodyType.KinematicBody, diskFixtureDef);
         diskBody.setUserData("disk");
         mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(spriteRedDisk0, diskBody, true, true));
@@ -426,20 +457,35 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
         if (diskCount <= 3){
             m_Scene.attachChild(spriteRedDisk0);
-            diskBody.setLinearVelocity(diskFireRate, 0);
+            diskBody.setLinearVelocity(diskFireRateX, (diskFireRateY * -1));
         }
         else {
 
-            if (hitCount == 3){
+            if (hitCount >= 3){
                 levelCount++;
+
                 gameLevelText.setText("Game Level: " + levelCount);
-                diskFireRate = diskFireRate + 5;
+                diskFireRateX = diskFireRateX + 2.5f;
+                diskFireRateY = diskFireRateY + 1.5f;
                 hitCount = 0;
                 diskCount = 0;
-                shootDisk();
+
+                startTimerText.setText("Current Level: " + levelCount);
+                startTimerText.setPosition((CAMERA_WIDTH/2) - startTimerText.getWidth()/2, (CAMERA_HEIGHT/2) - startTimerText.getHeight()/2);
+                m_Scene.attachChild(startTimerText);
+                m_Scene.registerUpdateHandler(nextLevelTimerHandler);
+
             }
             else{
+
+                gameOver = true;
                 gameLevelText.setText("Gameover");
+                startTimerText.setText("3");
+                startTimerText.setPosition((CAMERA_WIDTH/2) - startTimerText.getWidth()/2, (CAMERA_HEIGHT/2) - startTimerText.getHeight()/2);
+                m_Scene.attachChild(startTimerText);
+                m_Scene.registerUpdateHandler(countDownTimerHandler);
+
+
             }
 
         }
@@ -483,7 +529,6 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
                     didDiskFall = true;
 
 
-
                 }
             }
 
@@ -518,19 +563,28 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
         if(diffX < (diskSprite.getWidth()/2 + playerShot.getWidth()/3) && diffY < (diskSprite.getHeight()/2 + playerShot.getHeight()/3)){
             Log.d("HIT", "HIT");
-            hitCount++;
+
             mPhysicsWorld.unregisterPhysicsConnector(mPhysicsWorld.getPhysicsConnectorManager().findPhysicsConnectorByShape(playerShot));
             bulletBody.setActive(false);
             mPhysicsWorld.destroyBody(bulletBody);
             playerShot.detachSelf();
 
+            if (isSpriteShrunk){
+                hitCount +=3;
+                currentScoreText.setText("Current Score: " + hitCount);
 
-            diskBody.setAngularVelocity(10);
-            diskBody.setLinearVelocity(0, 20);
-
-            diskBody.setType(BodyDef.BodyType.DynamicBody);
-
-
+                diskBody.setType(BodyDef.BodyType.DynamicBody);
+                diskBody.setAngularVelocity(18);
+                diskBody.setLinearVelocity(0, 20);
+                isSpriteShrunk = false;
+            }
+            else{
+                hitCount++;
+                currentScoreText.setText("Current Score: " + hitCount);
+                diskBody.setType(BodyDef.BodyType.DynamicBody);
+                diskBody.setAngularVelocity(10);
+                diskBody.setLinearVelocity(0, 15);
+            }
             return true;
         }else {
 

@@ -6,23 +6,24 @@
     android:background="@android:color/white">
 
     <Button
-        android:text="Calibrate"
+        android:id="@+id/button_calibrate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="34dp"
-        android:layout_marginTop="61dp"
-        android:id="@+id/button_calibrate" />
+        android:layout_marginStart="36dp"
+        android:background="@drawable/button_menu"
+        android:text="Calibrate"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true" />
 
     <Button
-        android:text="Start"
+        android:id="@+id/button_start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="40dp"
-        android:id="@+id/button_start"
         android:layout_alignBaseline="@+id/button_calibrate"
         android:layout_alignBottom="@+id/button_calibrate"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="40dp"
+        android:background="@drawable/button_menu"
+        android:text="Start" />
 
 </RelativeLayout>

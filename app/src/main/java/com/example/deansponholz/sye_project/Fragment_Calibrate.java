@@ -82,7 +82,7 @@ public class Fragment_Calibrate extends Fragment {
 
         //onDraw
         Canvas canvas;
-        Paint paint = new Paint();
+        Paint paintCircle = new Paint();
 
 
         public CalibrateDrawView(Context context) {
@@ -93,19 +93,49 @@ public class Fragment_Calibrate extends Fragment {
         public void initMyView() {
             //Drawing Tools
             canvas = new Canvas();
-            paint = new Paint();
-            paint.setColor(Color.BLACK);
-            paint.setStrokeWidth(2);
-            paint.setStyle(Paint.Style.STROKE);
+            paintCircle = new Paint();
+            paintCircle.setColor(Color.BLACK);
+            paintCircle.setStrokeWidth(4);
+            paintCircle.setStyle(Paint.Style.STROKE);
         }
 
         @Override
         public void onDraw(Canvas canvas) {
-            canvas.drawCircle(constants_display.width / 2, constants_display.height / 2, 10, paint);
+            canvas.drawCircle(constants_display.width / 2, constants_display.height / 2, 10, paintCircle);
 
             canvas.drawCircle((float)(-sensorHandler.xPos*43 + (constants_display.width)/2),
                     (float) (sensorHandler.yPos*38 + ((constants_display.height)/2) - Constants_Display.difference),
-                    80, paint);
+                    80, paintCircle);
+            /*
+            fishX = (float) (-sensorHandler.xPos * 5) + xOffset;
+            fishY = (float) (sensorHandler.yPos * 5) + yOffset;
+
+
+
+
+            //Loop through to create 10 vertical lines
+            for (int i = 1; i < 15; i++) {
+                canvas.drawLine(fishX + (i * LINE_SPACING), -height, fishX + (i * LINE_SPACING), +height, paint);
+
+            }
+            for (int i = 1; i < 15; i++) {
+                canvas.drawLine(fishX + (i * -LINE_SPACING), -height, fishX + (i * -LINE_SPACING), +height, paint);
+
+            }
+
+            //Loop through to create 10 horizontal lines
+            for (int i = 1; i < 15; i++) {
+                canvas.drawLine(0, fishY + (i * LINE_SPACING), width, fishY + (i * LINE_SPACING), paint);
+
+            }
+            for (int i = 1; i < 15; i++) {
+                canvas.drawLine(0, fishY - (i * LINE_SPACING), width, fishY - (i * LINE_SPACING), paint);
+            }
+            //middle vertical line from landscape point of view
+            canvas.drawLine(fishX, -height, fishX, height, paint);
+            //middle horizontal line from landscape point of view
+            canvas.drawLine(0, fishY, width, fishY, paint);
+            */
 
             invalidate();
         }

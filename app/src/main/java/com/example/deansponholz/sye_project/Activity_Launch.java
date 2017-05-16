@@ -15,8 +15,7 @@ public class Activity_Launch extends AppCompatActivity {
      * Duration of wait
      **/
     private final int SPLASH_DISPLAY_LENGTH = 1000;
-
-
+    System_UI_Manager system_ui_manager;
 
 
     @Override
@@ -25,9 +24,15 @@ public class Activity_Launch extends AppCompatActivity {
         setContentView(R.layout.activity_launch);
 
         //hide status bar
-        System_UI_Manager system_ui_manager = new System_UI_Manager(this);
+        system_ui_manager = new System_UI_Manager(this);
         Constants_Display constants_display = new Constants_Display(getApplicationContext());
 
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         system_ui_manager.hideView();
                 /* New Handler to start the Menu-Activity
          * and close this Splash-Screen after some seconds.*/
@@ -42,3 +47,4 @@ public class Activity_Launch extends AppCompatActivity {
         }, SPLASH_DISPLAY_LENGTH);
     }
 }
+

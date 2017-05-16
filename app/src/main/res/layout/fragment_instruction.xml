@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/fragment_instruction"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/red"
     android:orientation="vertical">
 
-</LinearLayout>
+    <Button
+        android:id="@+id/button_instruction"
+        android:layout_width="@dimen/menu_button_size"
+        android:layout_height="@dimen/menu_button_size"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/button_menu"
+        android:text="@string/string_instruction"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/instruction_size" />
+</RelativeLayout>

@@ -1,6 +1,5 @@
 package com.example.deansponholz.sye_project;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -20,6 +19,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.support.v4.app.Fragment;
 
 import java.util.Random;
 
@@ -162,6 +162,7 @@ public class Fragment_Calibrate extends Fragment {
 
     @Override
     public void onResume() {
+
         super.onResume();
         system_ui_manager.hideView();
         fragment_calibrate.addView(calibrateDrawView);

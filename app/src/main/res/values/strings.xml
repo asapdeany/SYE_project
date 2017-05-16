@@ -3,4 +3,5 @@
     <string name="string_play">Play</string>
     <string name="calibrate">Calibrate</string>
     <string name="start">Start</string>
+    <string name="string_instruction">Instructions</string>
 </resources>

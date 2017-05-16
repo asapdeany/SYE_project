@@ -128,8 +128,8 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
     //Random
     private Random random = new Random();
-    int lowSpawn = 320;
-    int highSpawn = 750;
+    int lowSpawn = 400;
+    int highSpawn = 900;
 
 
     @Override
@@ -616,8 +616,6 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
         Vector2Pool.recycle(gravity);
         spriteCrosshair.setPosition((float)-SensorHandler.xPos * 43 + (CAMERA_WIDTH/2 -(textureCrosshair.getWidth()/2)),
                 (float)(SensorHandler.yPos * 43 + (CAMERA_HEIGHT/2) - Constants_Display.difference));
-
-        //spriteGun.setX((float)-SensorHandler.xPos * 20);
         spriteGun.setX((float)-SensorHandler.xPos * 22  + ((CAMERA_WIDTH/2) - (textureGun.getWidth()/2)));
     }
 }

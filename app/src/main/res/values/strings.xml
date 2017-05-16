@@ -4,4 +4,6 @@
     <string name="calibrate">Calibrate</string>
     <string name="start">Start</string>
     <string name="string_instruction">Instructions</string>
+    <string name="instruction_one">Welcome to Skeet Shooting. \n \n The objective of the game is to reach the deepest round possible. \n \n Tilt the device to aim and press the screen to fire!</string>
+    <string name="instructio_two">Each level contains three disks you must shoot. \n \n To reach the next level, your Current Score must be higher than 3. \n \n You recieve 1 point for hitting shooting the disk. \n \n If you hit the disk while the scope is out of view, you automatically recieve 3 points.</string>
 </resources>

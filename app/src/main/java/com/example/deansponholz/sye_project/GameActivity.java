@@ -506,28 +506,18 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
                 {
                     mPhysicsWorld.unregisterPhysicsConnector(mPhysicsWorld.getPhysicsConnectorManager().findPhysicsConnectorByShape(spriteRedDisk0));
                     diskBody.setActive(false);
-
                     mPhysicsWorld.destroyBody(diskBody);
-
                     spriteRedDisk0.detachSelf();
-
                     didDiskFall = true;
-
-
-
 
                 }
                 else if (x2.getBody().getUserData().equals("disk")&&x1.getBody().getUserData().equals("ground")){
 
                     mPhysicsWorld.unregisterPhysicsConnector(mPhysicsWorld.getPhysicsConnectorManager().findPhysicsConnectorByShape(spriteRedDisk0));
                     diskBody.setActive(false);
-
                     mPhysicsWorld.destroyBody(diskBody);
-
                     spriteRedDisk0.detachSelf();
-
                     didDiskFall = true;
-
 
                 }
             }
@@ -584,6 +574,7 @@ public class GameActivity extends SimpleBaseGameActivity implements IOnSceneTouc
                 diskBody.setType(BodyDef.BodyType.DynamicBody);
                 diskBody.setAngularVelocity(10);
                 diskBody.setLinearVelocity(0, 15);
+
             }
             return true;
         }else {

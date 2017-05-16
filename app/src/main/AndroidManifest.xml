@@ -24,6 +24,9 @@
         <activity android:name=".Activity_Menu"
             android:screenOrientation="landscape">
         </activity>
+        <activity android:name=".Activity_Instruction"
+            android:screenOrientation="landscape">
+        </activity>
         <activity android:name=".Activity_Calibrate"
             android:screenOrientation="landscape">
         </activity>

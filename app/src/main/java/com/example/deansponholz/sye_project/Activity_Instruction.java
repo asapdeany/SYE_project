@@ -19,17 +19,20 @@ public class Activity_Instruction extends FragmentActivity implements ViewPager.
 
 
     private RadioGroup radioGroup;
-    private static final int NUMBER_OF_PAGES = 5;
+    private static final int NUMBER_OF_PAGES = 2;
     ViewPager pager;
+    System_UI_Manager system_ui_manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_instruction);
 
-        //pager = (ViewPager) findViewById(R.id.viewPager);
-        //pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
-        //pager.addOnPageChangeListener(this);
+        system_ui_manager = new System_UI_Manager(this);
+        system_ui_manager.hideView();
+        pager = (ViewPager) findViewById(R.id.viewPager);
+        pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
+        pager.addOnPageChangeListener(this);
         radioGroup = (RadioGroup)findViewById(R.id.radiogroup);
         radioGroup.setOnCheckedChangeListener(this);
     }
@@ -49,17 +52,6 @@ public class Activity_Instruction extends FragmentActivity implements ViewPager.
             case 1:
                 radioGroup.check(R.id.radioButton2);
                 break;
-            case 2:
-                radioGroup.check(R.id.radioButton3);
-                break;
-            case 3:
-                radioGroup.check(R.id.radioButton4);
-                break;
-            case 4:
-                radioGroup.check(R.id.radioButton5);
-                break;
-            default:
-                radioGroup.check(R.id.radioButton1);
         }
     }
 
@@ -77,18 +69,9 @@ public class Activity_Instruction extends FragmentActivity implements ViewPager.
             case R.id.radioButton2:
                 pager.setCurrentItem(1);
                 break;
-            case R.id.radioButton3:
-                pager.setCurrentItem(2);
-                break;
-            case R.id.radioButton4:
-                pager.setCurrentItem(3);
-                break;
-            case R.id.radioButton5:
-                pager.setCurrentItem(4);
-                break;
         }
     }
-    /*
+
     private class MyPagerAdapter extends FragmentPagerAdapter {
 
         public MyPagerAdapter(FragmentManager fm) {
@@ -99,25 +82,22 @@ public class Activity_Instruction extends FragmentActivity implements ViewPager.
         public Fragment getItem(int pos) {
             switch(pos) {
 
-                /*
-                case 0: return Instruction_intro_Fragment.newInstance();
-                case 1: return Instruction_gamescreen_Fragment.newInstance();
-                case 2: return Instruction_practice_Fragment.newInstance();
-                case 3: return Instruction_tilt_Fragment.newInstance();
-                case 4: return Instruction_calibrate_Fragment.newInstance();
+
+                case 0: return Fragment_Instruction_Intro.newInstance();
+                case 1: return Fragment_Instruction_Two.newInstance();
 
 
-                default: return Instruction_intro_Fragment.newInstance();
 
-                default: return Fragment.instantiate(getApplicationContext(), "bro");
+                default: return Fragment_Instruction_Intro.newInstance();
+
             }
         }
 
         @Override
         public int getCount() {
-            return 5;
+            return 2;
         }
     }
 
-    */
+
 }

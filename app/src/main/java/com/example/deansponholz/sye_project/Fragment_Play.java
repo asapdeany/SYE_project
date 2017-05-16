@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,8 @@ public class Fragment_Play extends Fragment {
     public SensorHandler sensorHandler = null;
     private static final int LINE_SPACING = 100;
 
+    PlayButtonDrawView playButtonDrawView;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -45,7 +48,7 @@ public class Fragment_Play extends Fragment {
 
         sensorHandler = new SensorHandler(root.getContext());
 
-        PlayButtonDrawView calibrateDrawView = new PlayButtonDrawView(this.getActivity());
+        playButtonDrawView = new PlayButtonDrawView(this.getActivity());
 
         //Initialization
         button_play = (Button) root.findViewById(R.id.button_play);
@@ -58,7 +61,7 @@ public class Fragment_Play extends Fragment {
         });
         fragment_play = (RelativeLayout) root.findViewById(R.id.fragment_play);
         displayPlayButtonScene(root);
-        fragment_play.addView(calibrateDrawView);
+        //fragment_play.addView(playButtonDrawView);
         return root;
     }
 
@@ -169,7 +172,14 @@ public class Fragment_Play extends Fragment {
 
     @Override
     public void onResume() {
-        system_ui_manager.hideView();
         super.onResume();
+        system_ui_manager.hideView();
+        fragment_play.addView(playButtonDrawView);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        fragment_play.removeView(playButtonDrawView);
     }
 }

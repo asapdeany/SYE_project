@@ -42,6 +42,7 @@ public class Fragment_Calibrate extends Fragment {
     private static final int LINE_SPACING = 100;
     Random rand = new Random();
 
+    CalibrateDrawView calibrateDrawView;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_calibrate, container, false);
@@ -52,8 +53,8 @@ public class Fragment_Calibrate extends Fragment {
         sensorHandler = new SensorHandler(root.getContext());
         fragment_calibrate = (RelativeLayout) root.findViewById(R.id.fragment_calibrate);
 
-        CalibrateDrawView calibrateDrawView = new CalibrateDrawView(this.getActivity());
-        fragment_calibrate.addView(calibrateDrawView);
+        calibrateDrawView = new CalibrateDrawView(this.getActivity());
+
 
 
 
@@ -161,7 +162,14 @@ public class Fragment_Calibrate extends Fragment {
 
     @Override
     public void onResume() {
-        system_ui_manager.hideView();
         super.onResume();
+        system_ui_manager.hideView();
+        fragment_calibrate.addView(calibrateDrawView);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        fragment_calibrate.removeView(calibrateDrawView);
     }
 }
